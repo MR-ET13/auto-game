@@ -21,9 +21,10 @@ NO_BATTLE_TIMEOUT = 20.0  # 无战斗超时阈值（秒）
 pyautogui.PAUSE = 0.1  # 所有pyautogui操作的间隔
 pyautogui.FAILSAFE = True  # 鼠标移到屏幕四角触发紧急停止
 # 窗口位置大小设置 w, h, x, y
+# 主机
 # WINDOWS_ZZJB = [2380, 1400, 1376, 170]
 # WINDOWS_MLH = [1180, 1760, 130, 170]
-
+# 虚拟机
 WINDOWS_ZZJB = [850, 600, 500, 50]
 WINDOWS_MLH = [300, 650, 15, 50]
 

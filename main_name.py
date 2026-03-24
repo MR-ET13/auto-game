@@ -8,7 +8,7 @@ from winsize import set_window_size
 # ==================== 全局配置（可根据游戏调整） ====================
 
 # ==================== 【新增：SKT名字白色文字模板配置】 ====================
-SKT_TEMPLATE_PATH = "skt_template.png"  # 你的skt小截图
+SKT_TEMPLATE_PATH = "waet_template.png"  # 你的skt小截图
 try:
     # 自动提取白色文字，无视背景
     _tpl = cv2.imread(SKT_TEMPLATE_PATH)
@@ -330,16 +330,18 @@ def main():
     no_battle_start_time = time.time()
 
     try:
+        # 先执行多形态适配的导航
+        navigate_to_target()
+        # 导航完成后执行原有遇敌逻辑
+        print("\n📌 导航完成，启动原有自动遇敌逻辑...")
+        no_battle_start_time = time.time()
         while True:
-            # 先执行导航
-            navigate_to_target()
-            # 导航完成后执行原有遇敌逻辑
-            print("\n📌 导航完成，启动原有自动遇敌逻辑...")
-            no_battle_start_time = time.time()
             if is_in_battle():
                 no_battle_start_time = time.time()
+                print("🔴 进入战斗状态，等待战斗结束...")
                 while is_in_battle():
                     time.sleep(1)
+                print("🟢 战斗结束，等待返回地图界面...")
                 time.sleep(BATTLE_END_DELAY)
                 no_battle_start_time = time.time()
             else:
@@ -349,14 +351,15 @@ def main():
                     execute_timeout_operation()
                     no_battle_start_time = time.time()
                 else:
-                    first_dir = random.choice(["left", "right"])
-                    second_dir = "right" if first_dir == "left" else "left"
+                    print(f"⏳ 未检测到战斗，已计时 {elapsed_time:.1f} 秒（阈值：20秒）")
+                    first_dir = random.choice(["left", "right", "up", "down"])
+                    second_dir = random.choice([d for d in ["left", "right", "up", "down"] if d != first_dir])
                     move_once(first_dir)
                     move_once(second_dir)
     except KeyboardInterrupt:
-        print("\n🛑 脚本已手动停止")
+        print("\n🛑 脚本已手动停止（Ctrl+C）")
     except Exception as e:
-        print(f"\n❌ 脚本异常：{e}")
+        print(f"\n❌ 脚本异常终止：{str(e)}")
 
 # ==================== 入口 ====================
 if __name__ == "__main__":
