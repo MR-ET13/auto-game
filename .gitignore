@@ -35,3 +35,6 @@ dist/
 build/
 *.egg-info/
 *.egg
+
+# 图片
+*.png
