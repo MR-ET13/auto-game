@@ -1,0 +1,37 @@
+# Python 自动生成的缓存文件
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.pyc
+*.pyo
+*.pyd
+
+# PyCharm 默认虚拟环境（重点！）
+.venv/
+
+# 兼容其他虚拟环境
+venv/
+env/
+ENV/
+
+# PyCharm 编辑器配置
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# 日志、数据库、临时文件
+*.log
+*.db
+*.sqlite3
+.pytest_cache/
+.coverage
+htmlcov/
+
+# 打包构建目录
+dist/
+build/
+*.egg-info/
+*.egg
