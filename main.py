@@ -4,6 +4,7 @@ import pyautogui
 import time
 import random
 from winsize import set_window_size
+from get_pos import get_two_numbers_from_single_roi
 
 # ==================== 全局配置（可根据游戏调整） ====================
 # 模板匹配相关
@@ -12,6 +13,9 @@ MATCH_THRESHOLD = 0.75  # 模板匹配的置信度阈值
 # 移动相关
 MOVE_LEFT_KEY = "a"  # 左移按键
 MOVE_RIGHT_KEY = "d"  # 右移按键
+MOVE_UP_KEY = "w"  # 上移按键
+MOVE_DOWN_KEY = "s"  # 下移按键
+MOVE_DURATION = 3  # 默认移动时间
 MOVE_DURATION = 1.0  # 单次移动时长（秒）
 # 延迟相关
 BATTLE_END_DELAY = 3.0  # 战斗结束后等待返回地图的时间
@@ -63,17 +67,23 @@ def is_in_battle():
         return False
 
 
-def move_once(direction):
-    """执行单次方向移动"""
-    # 映射方向到按键和提示文本
-    key_map = {"left": (MOVE_LEFT_KEY, "向左", "⬅️"), "right": (MOVE_RIGHT_KEY, "向右", "➡️")}
+def move_once(direction, duration=MOVE_DURATION):
+    """执行单次方向移动：支持自定义移动时长，适配精准微调"""
+    key_map = {
+        "up": (MOVE_UP_KEY, "向上", "⬆️"),
+        "down": (MOVE_DOWN_KEY, "向下", "⬇️"),
+        "left": (MOVE_LEFT_KEY, "向左", "⬅️"),
+        "right": (MOVE_RIGHT_KEY, "向右", "➡️")
+    }
+    if direction not in key_map:
+        print(f"⚠️ 无效移动方向：{direction}")
+        return
     key, text, icon = key_map[direction]
-
-    print(f"{icon} 执行{text}移动，时长 {MOVE_DURATION} 秒")
+    print(f"{icon} 执行{text}移动，时长 {duration} 秒")
     pyautogui.keyDown(key)
-    time.sleep(MOVE_DURATION)
+    time.sleep(duration)
     pyautogui.keyUp(key)
-    time.sleep(0.5)  # 移动后短暂停顿，模拟真人操作
+    time.sleep(0.05)
 
 
 def execute_timeout_operation():
@@ -153,5 +163,55 @@ def main():
         print(f"\n❌ 脚本异常终止：{str(e)}")
 
 
+def move_dungeon(target_x, target_y, tolerance=0.5):
+    """
+    复用现有方法，通过 WASD 移动到目标坐标
+    :param target_x: 目标X坐标
+    :param target_y: 目标Y坐标
+    :param tolerance: 误差容忍度
+    """
+    print(f"\n🎯 开始移动到目标坐标：X={target_x}, Y={target_y}")
+
+    while True:
+        # 复用：遇到战斗等待结束
+        if is_in_battle():
+            print("战斗中，等待结束...")
+            while is_in_battle():
+                time.sleep(1)
+            time.sleep(BATTLE_END_DELAY)
+
+        # 调用 get_pos.py 的方法获取坐标
+        current_x, current_y = get_two_numbers_from_single_roi()
+        if current_x is None or current_y is None:
+            print("坐标获取失败，重试...")
+            time.sleep(0.5)
+            continue
+
+        print(f"当前坐标：({current_x:.1f}, {current_y:.1f})")
+
+        # 判断是否到达
+        if abs(current_x - target_x) <= tolerance and abs(current_y - target_y) <= tolerance:
+            print("✅ 已到达目标坐标！")
+            break
+
+        # 计算差值
+        dx = target_x - current_x
+        dy = target_y - current_y
+
+        # 复用 move_once 移动 X 轴（A/D）
+        if abs(dx) > tolerance:
+            direction = "right" if dx > 0 else "left"
+            # 小步移动，更精准
+            move_once(direction, duration=0.1)
+
+        # 复用 move_once 移动 Y 轴（W/S）
+        if abs(dy) > tolerance:
+            direction = "up" if dy > 0 else "down"
+            move_once(direction, duration=0.1)
+
+        time.sleep(0.1)
+
 if __name__ == "__main__":
-    main()
+    # main()
+    time.sleep(3)
+    move_dungeon(-10, -9)
