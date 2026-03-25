@@ -36,6 +36,10 @@ def move_once(direction, duration=MOVE_DEFULT_TIME):
     time.sleep(0.05)
     
 def dungeon():
+    # 全屏截屏
+    screenshot = pyautogui.screenshot()
+    # 保存图片
+    screenshot.save("full_screen.png")
     # move_once("down", MOVE_1 / MOVE_SPEED)
     # move_once("left", MOVE_2 / MOVE_SPEED)
     move_once("up", MOVE_3 / MOVE_SPEED)
