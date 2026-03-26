@@ -26,11 +26,11 @@ pyautogui.PAUSE = 0.1  # 所有pyautogui操作的间隔
 pyautogui.FAILSAFE = True  # 鼠标移到屏幕四角触发紧急停止
 # 窗口位置大小设置 w, h, x, y
 # 主机
-# WINDOWS_ZZJB = [2380, 1400, 1376, 170]
-# WINDOWS_MLH = [1180, 1760, 130, 170]
+WINDOWS_ZZJB = [2380, 1400, 1376, 170]
+WINDOWS_MLH = [1180, 1760, 130, 170]
 # 虚拟机
-WINDOWS_ZZJB = [850, 600, 500, 50]
-WINDOWS_MLH = [300, 650, 15, 50]
+# WINDOWS_ZZJB = [850, 600, 500, 50]
+# WINDOWS_MLH = [300, 650, 15, 50]
 
 
 
@@ -212,6 +212,6 @@ def move_dungeon(target_x, target_y, tolerance=0.5):
         time.sleep(0.1)
 
 if __name__ == "__main__":
-    # main()
-    time.sleep(3)
-    move_dungeon(-10, -9)
+    main()
+    # time.sleep(3)
+    # move_dungeon(-10, -9)

@@ -1,5 +1,10 @@
 import win32gui
 import win32con
+import cv2
+import numpy as np
+import pyautogui
+import time
+import random
 
 def set_window_size(window_title, width, height, x=0, y=0):
     """
@@ -42,9 +47,14 @@ def set_window_size(window_title, width, height, x=0, y=0):
 
 # ==================== 示例调用 ====================
 if __name__ == "__main__":
-    # 示例1：设置记事本窗口为 800×600，位置(100, 100)
-    # set_window_size("重装机兵:墟",850, 600, 500, 50)
-    # set_window_size("命令提示符",300, 650, 15, 50)
-    # set_window_size("VMware",1280, 800, 300, 50)
-    print("运行")
-    set_window_size("Notepad++",800, 650, 15, 50)
+    # 主机
+    WINDOWS_ZZJB = [2380, 1400, 1376, 170]
+    WINDOWS_MLH = [1180, 1760, 130, 170]
+    # 虚拟机
+    # WINDOWS_ZZJB = [850, 600, 500, 50]
+    # WINDOWS_MLH = [300, 650, 15, 50]
+    set_window_size("重装机兵:墟", WINDOWS_ZZJB[0], WINDOWS_ZZJB[1], WINDOWS_ZZJB[2], WINDOWS_ZZJB[3])  # 设置窗口为指定大小和位置
+    set_window_size("命令提示符", WINDOWS_MLH[0], WINDOWS_MLH[1], WINDOWS_MLH[2], WINDOWS_MLH[3])  # 设置窗口为指定大小和位置
+
+    # print("运行")
+    # set_window_size("Notepad++",800, 650, 15, 50)

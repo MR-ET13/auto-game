@@ -231,29 +231,13 @@ def get_img():
     # 保存调试截图（确认ROI是否覆盖完整、预处理是否清晰）
     cv2.imwrite("debug_roi_clean.png", clean_roi)  # 预处理后ROI
 
-# ====================== 运行测试 ======================
-if __name__ == "__main__":
-    # print("3秒后开始识别...")
-    # time.sleep(3)
-    #
-    # # 识别单个ROI内的两个数字
-    # num1, num2 = get_two_numbers_from_single_roi()
-    # # num1, num2 = get_two_number_from_one()
-    #
-    # # 输出结果
-    # if num1 is not None and num2 is not None:
-    #     print(f"识别成功 → 数字1：{num1}，数字2：{num2}")
-    # else:
-    #     print(f"识别失败 → 数字1：{num1}，数字2：{num2}")
-    i = 4
-    num = '3'
-    index = -1
+def get_testimg(i, num, index):
     get_img()
     c1 = c_img.crop_text_max_rect('debug_roi_clean.png', 2)
     cv2.imwrite(r".\pro_img\c1.png", c1)
     if index == 1:
         c2 = c_img.crop_with_width_window(r".\pro_img\c1.png", SINGLE_NUMBER_PIXEL,
-                                      False, SINGLE_NUMBER_PIXEL * 0)
+                                          False, SINGLE_NUMBER_PIXEL * 0)
     elif index == 2:
         c2 = c_img.crop_with_width_window(r".\pro_img\c1.png", SINGLE_NUMBER_PIXEL,
                                           False, SINGLE_NUMBER_PIXEL * 1)
@@ -272,5 +256,33 @@ if __name__ == "__main__":
     cv2.imwrite(r".\pro_img\c2.png", c2)
     c3 = c_img.pad_to_square_centered(r".\pro_img\c2.png")
     cv2.imwrite(f".\\pro_img\\{i}.png", c3)
-    shutil.copy(f".\\pro_img\\{i}.png", f".\\dataset\\{num}")
+    shutil.move(f".\\pro_img\\{i}.png", f".\\my_dataset\\{num}")
+
+def get_numimg(digit_num):
+    get_img()
+    c1 = c_img.crop_text_max_rect('debug_roi_clean.png', 2)
+    cv2.imwrite(r".\pro_img\c1.png", c1)
+    c2 = c_img.crop_with_width_window(r".\pro_img\c1.png", SINGLE_NUMBER_PIXEL * digit_num,
+                                      False, SINGLE_NUMBER_PIXEL * 0)
+    cv2.imwrite(r".\pro_img\c2.png", c2)
+    c3 = c_img.pad_to_square_centered(r".\pro_img\c2.png")
+    cv2.imwrite(f".\\pro_img\\c3.png", c3)
+
+# ====================== 运行测试 ======================
+if __name__ == "__main__":
+    # print("3秒后开始识别...")
+    # time.sleep(3)
+    #
+    # # 识别单个ROI内的两个数字
+    # num1, num2 = get_two_numbers_from_single_roi()
+    # # num1, num2 = get_two_number_from_one()
+    #
+    # # 输出结果
+    # if num1 is not None and num2 is not None:
+    #     print(f"识别成功 → 数字1：{num1}，数字2：{num2}")
+    # else:
+    #     print(f"识别失败 → 数字1：{num1}，数字2：{num2}")
+
+    # get_testimg(23, '4', -2)
+    get_numimg(3)
 

@@ -6,6 +6,7 @@ from torchvision import transforms
 from PIL import Image
 import os
 import random
+from get_pos import get_numimg
 
 # ======================
 # 1. 你的类别：负号 + 0~9
@@ -128,8 +129,11 @@ def predict_number(image_path, model):
 if __name__ == "__main__":
     import numpy as np
 
+    print("获取预测用的图片...")
+    get_numimg(1)
+
     MODEL_PATH = "my_own_model.pth"
-    IMAGE_PATH = "test_number.png"  # 你要识别的图片
+    IMAGE_PATH = r".\pro_img\c2.png"  # 你要识别的图片
 
     if os.path.exists(MODEL_PATH):
         print("✅ 加载你自己训练的模型...")
