@@ -4,12 +4,13 @@ import pyautogui
 import time
 import random
 from winsize import set_window_size
-from get_pos import get_two_numbers_from_single_roi
-from get_pos import get_two_number_from_one
+# from get_pos import get_two_numbers_from_single_roi
+# from get_pos import get_two_number_from_one
+from get_pos import get_twonumberby_torch
 
 # ==================== 全局配置（新增/调整） ====================
 # 模板匹配相关
-BATTLE_TEMPLATE_PATH = "battle_template1.png"
+BATTLE_TEMPLATE_PATH = "battle_template2.png"
 MATCH_THRESHOLD = 0.75
 # 移动相关
 MOVE_LEFT_KEY = "a"
@@ -26,13 +27,17 @@ MOVE_TOLERANCE = 0.5       # 坐标误差容忍度
 BLOCK_DETECTION_THRESH = 0.1  # 移动后坐标变化小于此值判定为被阻挡
 MAX_BLOCK_RETRIES = 3      # 单一方向最大阻挡重试次数
 STEP_DURATION = 0.2        # 小步移动时长
-STEP_DURATION_BIG = 0.5        # 大步移动时长
+STEP_DURATION_BIG = 1        # 大步移动时长
 # 安全配置
 pyautogui.PAUSE = 0.1
 pyautogui.FAILSAFE = True
 # 窗口配置
-WINDOWS_ZZJB = [850, 600, 500, 50]
-WINDOWS_MLH = [300, 650, 15, 50]
+# 主机
+WINDOWS_ZZJB = [2380, 1400, 1376, 170]
+WINDOWS_MLH = [1180, 1760, 130, 170]
+# 虚拟机
+# WINDOWS_ZZJB = [850, 600, 500, 50]
+# WINDOWS_MLH = [300, 650, 15, 50]
 
 # ==================== 原有核心函数（保留） ====================
 def capture_screen():
@@ -91,7 +96,7 @@ def execute_timeout_operation():
     print("✅ 超时操作执行完成，恢复正常移动\n")
 
 # ==================== 优化后的地牢移动函数 ====================
-def move_dungeon(target_x, target_y):
+def move_dungeon(target_x, target_y, first='y'):
     """
     优化版地牢移动：增加阻挡检测，避免单一方向死磕
     :param target_x: 目标X坐标
@@ -107,12 +112,12 @@ def move_dungeon(target_x, target_y):
             print("🔴 战斗中，等待结束...")
             while is_in_battle():
                 time.sleep(1)
+            print("🟢 战斗结束，等待返回地图界面...")
             time.sleep(BATTLE_END_DELAY)
-            block_retry_count = 0  # 战斗后重置阻挡计数器
-            continue
+            break
 
         # 2. 获取当前坐标
-        current_x, current_y = get_two_number_from_one()
+        current_x, current_y = get_twonumberby_torch()
         if current_x is None or current_y is None:
             print("⚠️ 坐标获取失败，随机移动，重试...")
             alt_dir = random.choice(["up", "down", "left", "right"])
@@ -131,21 +136,50 @@ def move_dungeon(target_x, target_y):
         move_dir = None
 
         # 优先处理y轴（竖直）
-        if abs(dy) > MOVE_TOLERANCE:
-            move_dir = "up" if dy > 0 else "down"
-        elif abs(dx) > MOVE_TOLERANCE:
-            move_dir = "right" if dx > 0 else "left"
+        if first == 'y':
+            if abs(dy) > MOVE_TOLERANCE:
+                move_dir = "up" if dy > 0 else "down"
+            elif abs(dx) > MOVE_TOLERANCE:
+                move_dir = "right" if dx > 0 else "left"
+        else:
+            if abs(dx) > MOVE_TOLERANCE:
+                move_dir = "right" if dx > 0 else "left"
+            elif abs(dy) > MOVE_TOLERANCE:
+                move_dir = "up" if dy > 0 else "down"
 
         # 5. 阻挡检测：记录移动前坐标，执行移动后对比
         pre_move_x, pre_move_y = current_x, current_y
         if move_dir:
             print(f"📌 当前({current_x:.1f}, {current_y:.1f}) | 目标偏差 X:{dx:.1f}, Y:{dy:.1f} | 计划移动：{move_dir}")
-            duration = STEP_DURATION_BIG if abs(dx) > 3 or abs(dy) > 3 else STEP_DURATION
-            move_once(move_dir, duration)
+            if move_dir in ["left", "right"]:
+                duration = STEP_DURATION_BIG if abs(dx) > 5  else STEP_DURATION
+                move_once(move_dir, duration)
+                time.sleep(2)
+                # 1. 战斗检测：遇到战斗等待结束
+                if is_in_battle():
+                    print("🔴 战斗中，等待结束...")
+                    while is_in_battle():
+                        time.sleep(1)
+                    print("🟢 战斗结束，等待返回地图界面...")
+                    time.sleep(BATTLE_END_DELAY)
+                    break
+            else:
+                duration = STEP_DURATION_BIG if abs(dy) > 5 else STEP_DURATION
+                move_once(move_dir, duration)
+                time.sleep(2)
+                # 1. 战斗检测：遇到战斗等待结束
+                if is_in_battle():
+                    print("🔴 战斗中，等待结束...")
+                    while is_in_battle():
+                        time.sleep(1)
+                    print("🟢 战斗结束，等待返回地图界面...")
+                    time.sleep(BATTLE_END_DELAY)
+                    break
+
             time.sleep(0.1)  # 移动后等待坐标更新
 
             # 获取移动后坐标
-            post_x, post_y = get_two_number_from_one()
+            post_x, post_y = get_twonumberby_torch()
             if post_x is None or post_y is None:
                 post_x, post_y = pre_move_x, pre_move_y
 
@@ -181,6 +215,8 @@ def move_dungeon(target_x, target_y):
             print(f"⚠️ 无有效移动方向！当前({current_x:.1f}, {current_y:.1f}) | 目标({target_x}, {target_y})")
             time.sleep(0.5)
 
+
+
 # ==================== 主逻辑（保留） ====================
 def main():
     print("=" * 60)
@@ -190,14 +226,13 @@ def main():
     print(f"按键配置：左({MOVE_LEFT_KEY}) 右({MOVE_RIGHT_KEY}) | 紧急停止：鼠标移屏幕四角")
     print("=" * 60)
     set_window_size("重装机兵:墟", WINDOWS_ZZJB[0], WINDOWS_ZZJB[1], WINDOWS_ZZJB[2], WINDOWS_ZZJB[3])
-    set_window_size("命令提示符", WINDOWS_MLH[0], WINDOWS_MLH[1], WINDOWS_MLH[2], WINDOWS_MLH[3])
+    set_window_size("Windows PowerShell", WINDOWS_MLH[0], WINDOWS_MLH[1], WINDOWS_MLH[2], WINDOWS_MLH[3])
     time.sleep(INTERFACE_DELAY)
 
     no_battle_start_time = time.time()
     try:
         while True:
             if is_in_battle():
-                no_battle_start_time = time.time()
                 print("🔴 进入战斗状态，等待战斗结束...")
                 while is_in_battle():
                     time.sleep(1)
@@ -221,7 +256,64 @@ def main():
     except Exception as e:
         print(f"\n❌ 脚本异常终止：{str(e)}")
 
+def presskey_times(key, times=1):
+    for _ in range(times):
+        pyautogui.press(key)
+        time.sleep(0.5)
+
 if __name__ == "__main__":
     # main()
-    time.sleep(3)
-    move_dungeon(-17, -9)
+    while True:
+        # move_dungeon(-8, -5, 'y')
+
+        # move_dungeon(0, -11, 'y')
+        #
+        # move_dungeon(17, -11, 'x')
+        #
+        # move_dungeon(25, -8, 'x')
+        #
+        # move_dungeon(-15, -11, 'y')
+        # move_dungeon(-15, -8, 'y')
+
+        # move_dungeon(-24, -6, 'x')
+        # move_dungeon(-25, -3, 'x')
+
+        move_dungeon(-25, 9, 'x')
+        move_dungeon(-22, 9, 'x')
+
+        move_dungeon(-20, 15, 'x')
+        move_dungeon(-15, 15, 'x')
+
+        move_dungeon(-20, 8, 'x')
+        move_dungeon(-10, 8, 'x')
+
+        move_dungeon(-8, 9, 'x')
+        move_dungeon(-3, 9, 'x')
+
+        move_dungeon(8, 8, 'x')
+
+        move_dungeon(13, 4, 'y')
+        move_dungeon(13, -2, 'y')
+
+        move_dungeon(13, 6, 'x')
+
+
+        move_once("right", 0.5)
+        presskey_times("j")
+        presskey_times("w")
+        presskey_times("j", 2)
+        time.sleep(3)
+        presskey_times("j")
+        presskey_times("s", 3)
+        presskey_times("j")
+        presskey_times("d", 2)
+        presskey_times("j")
+        time.sleep(1)
+        presskey_times("k", 2)
+
+        move_once("up", 0.5)
+        presskey_times("j", 2)
+        presskey_times("w")
+        presskey_times("j")
+
+

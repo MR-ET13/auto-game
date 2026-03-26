@@ -54,7 +54,11 @@ if __name__ == "__main__":
     # WINDOWS_ZZJB = [850, 600, 500, 50]
     # WINDOWS_MLH = [300, 650, 15, 50]
     set_window_size("重装机兵:墟", WINDOWS_ZZJB[0], WINDOWS_ZZJB[1], WINDOWS_ZZJB[2], WINDOWS_ZZJB[3])  # 设置窗口为指定大小和位置
-    set_window_size("命令提示符", WINDOWS_MLH[0], WINDOWS_MLH[1], WINDOWS_MLH[2], WINDOWS_MLH[3])  # 设置窗口为指定大小和位置
+    set_window_size("Windows PowerShell", WINDOWS_MLH[0], WINDOWS_MLH[1], WINDOWS_MLH[2], WINDOWS_MLH[3])  # 设置窗口为指定大小和位置
 
     # print("运行")
     # set_window_size("Notepad++",800, 650, 15, 50)
+    
+    # set_window_size("VMware Workstation",2600, 1700, 1200, 170)
+    
+    

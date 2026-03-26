@@ -4,11 +4,11 @@ import pyautogui
 import time
 import random
 from winsize import set_window_size
-from get_pos import get_two_numbers_from_single_roi
+from get_pos import get_two_numbers_from_single_roi, get_numimg
 
 # ==================== 全局配置（可根据游戏调整） ====================
 # 模板匹配相关
-BATTLE_TEMPLATE_PATH = "battle_template1.png"  # 战斗界面的模板图路径，1表示虚拟机，2表示主机
+BATTLE_TEMPLATE_PATH = "battle_template2.png"  # 战斗界面的模板图路径，1表示虚拟机，2表示主机
 MATCH_THRESHOLD = 0.75  # 模板匹配的置信度阈值
 # 移动相关
 MOVE_LEFT_KEY = "a"  # 左移按键
@@ -21,6 +21,7 @@ MOVE_DURATION = 1.0  # 单次移动时长（秒）
 BATTLE_END_DELAY = 3.0  # 战斗结束后等待返回地图的时间
 INTERFACE_DELAY = 3.0  # 脚本启动后的初始等待时间
 NO_BATTLE_TIMEOUT = 20.0  # 无战斗超时阈值（秒）
+IMG_TIME = 40  # 截图时间间隔
 # 安全配置
 pyautogui.PAUSE = 0.1  # 所有pyautogui操作的间隔
 pyautogui.FAILSAFE = True  # 鼠标移到屏幕四角触发紧急停止
@@ -117,18 +118,20 @@ def main():
     print(f"按键配置：左({MOVE_LEFT_KEY}) 右({MOVE_RIGHT_KEY}) | 紧急停止：鼠标移屏幕四角")
     print("=" * 60)
     set_window_size("重装机兵:墟", WINDOWS_ZZJB[0], WINDOWS_ZZJB[1], WINDOWS_ZZJB[2], WINDOWS_ZZJB[3])  # 设置窗口为指定大小和位置
-    set_window_size("命令提示符", WINDOWS_MLH[0], WINDOWS_MLH[1], WINDOWS_MLH[2], WINDOWS_MLH[3])  # 设置窗口为指定大小和位置
+    set_window_size("Windows PowerShell", WINDOWS_MLH[0], WINDOWS_MLH[1], WINDOWS_MLH[2], WINDOWS_MLH[3])  # 设置窗口为指定大小和位置
 
     time.sleep(INTERFACE_DELAY)  # 启动后等待，给你切换到游戏窗口的时间
 
     # 初始化无战斗计时
     no_battle_start_time = time.time()
+    img_time = time.time()
+    img_index = 29
 
     try:
         while True:
             # 1. 检测到战斗：重置计时，等待战斗结束
             if is_in_battle():
-                no_battle_start_time = time.time()  # 重置无战斗计时器
+                # no_battle_start_time = time.time()  # 重置无战斗计时器
                 print("🔴 进入战斗状态，等待战斗结束...")
                 while is_in_battle():  # 循环检测，直到脱离战斗
                     time.sleep(1)
@@ -140,18 +143,30 @@ def main():
             else:
                 current_time = time.time()
                 elapsed_time = current_time - no_battle_start_time
+                
+                delta_img_time = current_time - img_time
 
                 # 2.1 超过20秒未战斗：执行特殊操作
                 if elapsed_time > NO_BATTLE_TIMEOUT:
                     execute_timeout_operation()
                     no_battle_start_time = time.time()  # 重置计时器
+                    
+                # 达到截图时间间隔
+                elif delta_img_time > IMG_TIME:
+                    print("开始截取坐标图片")
+                    get_numimg(0, img_index)
+                    img_index += 1
+                    img_time = time.time()
 
                 # 2.2 未超时：执行正常移动
                 else:
                     print(f"⏳ 未检测到战斗，已计时 {elapsed_time:.1f} 秒（阈值：20秒）")
                     # 随机决定本次循环的第一个移动方向
-                    first_dir = random.choice(["left", "right"])
-                    second_dir = "right" if first_dir == "left" else "left"
+                    first_dir = random.choice(["left", "right", "up", "down"])
+                    if first_dir in ["left", "right"]:
+                        second_dir = "right" if first_dir == "left" else "left"
+                    else:
+                        second_dir = "up" if first_dir == "down" else "down"
 
                     # 执行：先随机方向，再切换方向
                     move_once(first_dir)
