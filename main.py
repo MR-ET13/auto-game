@@ -4,11 +4,19 @@ import pyautogui
 import time
 import random
 from winsize import set_window_size
-from get_pos import get_two_numbers_from_single_roi, get_numimg
+from get_pos import get_numimg, get_twonumberby_torch
+from main_name import find_skt_center, get_single_template_center
+from move_dungeon import presskey_times
+from main_backup import move_dungeon as md
 
 # ==================== 全局配置（可根据游戏调整） ====================
 # 模板匹配相关
 BATTLE_TEMPLATE_PATH = "battle_template2.png"  # 战斗界面的模板图路径，1表示虚拟机，2表示主机
+MINE_TEMPLATE = "mine_template.png"
+MINE_THRESHOLD = 0.6
+MOVE_CONST_MAX = 500
+MOVE_CONST_MIN = 100
+MOVE_SPEED = 305
 MATCH_THRESHOLD = 0.75  # 模板匹配的置信度阈值
 # 移动相关
 MOVE_LEFT_KEY = "a"  # 左移按键
@@ -21,7 +29,9 @@ MOVE_DURATION = 1.0  # 单次移动时长（秒）
 BATTLE_END_DELAY = 3.0  # 战斗结束后等待返回地图的时间
 INTERFACE_DELAY = 3.0  # 脚本启动后的初始等待时间
 NO_BATTLE_TIMEOUT = 20.0  # 无战斗超时阈值（秒）
-IMG_TIME = 40  # 截图时间间隔
+IMG_TIME = 20  # 截图时间间隔
+IMG_START_IDX = 33  # 截图开始序号
+IMG_IS = True
 # 安全配置
 pyautogui.PAUSE = 0.1  # 所有pyautogui操作的间隔
 pyautogui.FAILSAFE = True  # 鼠标移到屏幕四角触发紧急停止
@@ -67,6 +77,29 @@ def is_in_battle():
         print(f"⚠️ 战斗检测出错：{e}")
         return False
 
+def is_in_mine():
+    """检测是否有矿，返回布尔值"""
+    try:
+        # 读取模板图（灰度模式，减少计算量）
+        template = cv2.imread(MINE_TEMPLATE, 0)
+        if template is None:
+            raise FileNotFoundError(f"模板文件不存在：{MINE_TEMPLATE}")
+
+        # 截取屏幕并转为灰度图
+        frame = capture_screen()
+        frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+        # 模板匹配
+        result = cv2.matchTemplate(frame_gray, template, cv2.TM_CCOEFF_NORMED)
+        max_val = cv2.minMaxLoc(result)[1]  # 只取最大匹配值
+
+        if max_val >= MINE_THRESHOLD:
+            print(f"✅ 检测到有矿（匹配度：{max_val:.2f}）")
+            return True
+        return False
+    except Exception as e:
+        print(f"⚠️ 矿检测出错：{e}")
+        return False
 
 def move_once(direction, duration=MOVE_DURATION):
     """执行单次方向移动：支持自定义移动时长，适配精准微调"""
@@ -125,10 +158,11 @@ def main():
     # 初始化无战斗计时
     no_battle_start_time = time.time()
     img_time = time.time()
-    img_index = 29
+    img_index = IMG_START_IDX
 
     try:
         while True:
+            print("当前时间：", time.strftime("%H:%M"))
             # 1. 检测到战斗：重置计时，等待战斗结束
             if is_in_battle():
                 # no_battle_start_time = time.time()  # 重置无战斗计时器
@@ -141,6 +175,9 @@ def main():
 
             # 2. 未检测到战斗：检查是否超时
             else:
+                if not IMG_IS:
+                    img_time = time.time()  # 不截图操作
+                    
                 current_time = time.time()
                 elapsed_time = current_time - no_battle_start_time
                 
@@ -162,7 +199,8 @@ def main():
                 else:
                     print(f"⏳ 未检测到战斗，已计时 {elapsed_time:.1f} 秒（阈值：20秒）")
                     # 随机决定本次循环的第一个移动方向
-                    first_dir = random.choice(["left", "right", "up", "down"])
+                    # first_dir = random.choice(["left", "right", "up", "down"])
+                    first_dir = random.choice(["left", "right"])
                     if first_dir in ["left", "right"]:
                         second_dir = "right" if first_dir == "left" else "left"
                     else:
@@ -178,55 +216,116 @@ def main():
         print(f"\n❌ 脚本异常终止：{str(e)}")
 
 
-def move_dungeon(target_x, target_y, tolerance=0.5):
-    """
-    复用现有方法，通过 WASD 移动到目标坐标
-    :param target_x: 目标X坐标
-    :param target_y: 目标Y坐标
-    :param tolerance: 误差容忍度
-    """
-    print(f"\n🎯 开始移动到目标坐标：X={target_x}, Y={target_y}")
+def dig_mine():
+    print("=" * 20)
+    print("挖矿")
+    print("=" * 20)
+    
+    try:
+        while True:
+            print("当前时间：", time.strftime("%H:%M"))
+            if is_in_mine():
+                play_x, play_y = find_skt_center()
+                mine_x, mine_y = get_single_template_center(MINE_TEMPLATE, MINE_THRESHOLD)
+                
+                dx = mine_x - play_x
+                move_time = dx / MOVE_SPEED
+                if dx > 0:        
+                    move_once("right", move_time)
+                    move_dir = "right"
+                    # 进入战斗缓冲时间
+                    time.sleep(2)
+                    # 1. 战斗检测：遇到战斗等待结束
+                    if is_in_battle():
+                        print("🔴 战斗中，等待结束...")
+                        while is_in_battle():
+                            time.sleep(1)
+                        print("🟢 战斗结束，等待返回地图界面...")
+                        time.sleep(BATTLE_END_DELAY)
+                        continue
+                else:
+                    move_time = -move_time
+                    move_once("left", move_time)
+                    move_dir = "left"
+                    # 进入战斗缓冲时间
+                    time.sleep(2)
+                    # 1. 战斗检测：遇到战斗等待结束
+                    if is_in_battle():
+                        print("🔴 战斗中，等待结束...")
+                        while is_in_battle():
+                            time.sleep(1)
+                        print("🟢 战斗结束，等待返回地图界面...")
+                        time.sleep(BATTLE_END_DELAY)
+                        continue
 
-    while True:
-        # 复用：遇到战斗等待结束
-        if is_in_battle():
-            print("战斗中，等待结束...")
-            while is_in_battle():
-                time.sleep(1)
-            time.sleep(BATTLE_END_DELAY)
-
-        # 调用 get_pos.py 的方法获取坐标
-        current_x, current_y = get_two_numbers_from_single_roi()
-        if current_x is None or current_y is None:
-            print("坐标获取失败，重试...")
-            time.sleep(0.5)
-            continue
-
-        print(f"当前坐标：({current_x:.1f}, {current_y:.1f})")
-
-        # 判断是否到达
-        if abs(current_x - target_x) <= tolerance and abs(current_y - target_y) <= tolerance:
-            print("✅ 已到达目标坐标！")
-            break
-
-        # 计算差值
-        dx = target_x - current_x
-        dy = target_y - current_y
-
-        # 复用 move_once 移动 X 轴（A/D）
-        if abs(dx) > tolerance:
-            direction = "right" if dx > 0 else "left"
-            # 小步移动，更精准
-            move_once(direction, duration=0.1)
-
-        # 复用 move_once 移动 Y 轴（W/S）
-        if abs(dy) > tolerance:
-            direction = "up" if dy > 0 else "down"
-            move_once(direction, duration=0.1)
-
-        time.sleep(0.1)
+                
+                move_once("up", MOVE_CONST_MAX / MOVE_SPEED)
+                # 进入战斗缓冲时间
+                time.sleep(2)
+                # 1. 战斗检测：遇到战斗等待结束
+                if is_in_battle():
+                    print("🔴 战斗中，等待结束...")
+                    while is_in_battle():
+                        time.sleep(1)
+                    print("🟢 战斗结束，等待返回地图界面...")
+                    time.sleep(BATTLE_END_DELAY)
+                    continue
+                
+                presskey_times("j", 2)
+                time.sleep(6)
+                
+                move_once("down", MOVE_CONST_MIN / MOVE_SPEED)
+                # 进入战斗缓冲时间
+                time.sleep(2)
+                # 1. 战斗检测：遇到战斗等待结束
+                if is_in_battle():
+                    print("🔴 战斗中，等待结束...")
+                    while is_in_battle():
+                        time.sleep(1)
+                    print("🟢 战斗结束，等待返回地图界面...")
+                    time.sleep(BATTLE_END_DELAY)
+                    continue
+                    
+                    
+                    
+                if move_dir == "right":
+                    move_once("left", move_time)
+                    # 进入战斗缓冲时间
+                    time.sleep(2)
+                    # 1. 战斗检测：遇到战斗等待结束
+                    if is_in_battle():
+                        print("🔴 战斗中，等待结束...")
+                        while is_in_battle():
+                            time.sleep(1)
+                        print("🟢 战斗结束，等待返回地图界面...")
+                        time.sleep(BATTLE_END_DELAY)
+                        continue
+                else:
+                    move_once("right", move_time)
+                    # 进入战斗缓冲时间
+                    time.sleep(2)
+                    # 1. 战斗检测：遇到战斗等待结束
+                    if is_in_battle():
+                        print("🔴 战斗中，等待结束...")
+                        while is_in_battle():
+                            time.sleep(1)
+                        print("🟢 战斗结束，等待返回地图界面...")
+                        time.sleep(BATTLE_END_DELAY)
+                        continue
+                
+            else:
+                # 归位
+                pos_x, pos_y = get_twonumberby_torch()
+                if pos_x != 12 or pos_y != 13:
+                    md(12, 13)
+                            
+    
+    except KeyboardInterrupt:
+        print("\n🛑 脚本已手动停止（Ctrl+C）")
+    except Exception as e:
+        print(f"\n❌ 脚本异常终止：{str(e)}")
+                
 
 if __name__ == "__main__":
-    main()
-    # time.sleep(3)
-    # move_dungeon(-10, -9)
+    # main()
+    dig_mine()

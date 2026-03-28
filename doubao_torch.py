@@ -20,8 +20,6 @@ CLASS_TO_IDX = {c: i for i, c in enumerate(CLASSES)}
 IDX_TO_CLASS = {i: c for i, c in enumerate(CLASSES)}
 
 WHITE_RATIO_MAX = 275  # 1
-WHITE_RATIO_MAX_61 = 550  # 6和61
-
 
 # ======================
 # 2. 优化后的模型结构
@@ -78,7 +76,7 @@ class DigitSymbolModel(nn.Module):
 # - 随机反转（数字对称不影响识别）
 # ======================
 class MyOwnDataset(Dataset):
-    def __init__(self, root_dir="my_dataset", train=True):
+    def __init__(self, root_dir="my_datasetbackup", train=True):
         self.root = root_dir
         self.train = train
 
@@ -287,7 +285,7 @@ def check_is_one(image, idx, sp=False):
         # 取数字核心区域（排除负号）：横向20%~80%，纵向10%~90%
         eight_core = crop_img[:, :]
         # 白色像素占比：8的闭合轮廓占比远高于4
-        white_ratio = np.sum(eight_core == 255)
+        white_ratio = np.sum(eight_core == 255) 
 
         if white_ratio < WHITE_RATIO_MAX:
             idx = 2
@@ -304,8 +302,8 @@ def check_white_ratio(image_path):
 
     crop_img = crop_text_max_rect(image_path)
     eight_core = crop_img[:, :]
-    # white_ratio = np.sum(eight_core == 255) / (eight_core.shape[0] * eight_core.shape[1])
-    white_ratio = np.sum(eight_core == 255)
+    white_ratio = np.sum(eight_core == 255) / (eight_core.shape[0] * eight_core.shape[1])
+    # white_ratio = np.sum(eight_core == 255) 
 
     return white_ratio
 
@@ -324,23 +322,26 @@ def calc_num(dst):
 
 def show_num_ratio():
     """
-    绘制三种数字的计算结果比较
+    绘制四种数字的计算结果比较
     :return:
     """
     import matplotlib.pyplot as plt
 
-    dst1 = r".\my_dataset\1"
-    dst4 = r".\my_dataset\4"
-    dst5 = r".\my_dataset\6"
+    dst1 = r".\my_datasetbackup\1"
+    dst4 = r".\my_datasetbackup\4"
+    dst5 = r".\my_datasetbackup\5"
+    dst6 = r".\my_datasetbackup\6"
 
     l1 = calc_num(dst1)
     l4 = calc_num(dst4)
     l5 = calc_num(dst5)
+    l6 = calc_num(dst6)
 
     # 计算平均值
     avg1 = np.mean(l1)
     avg4 = np.mean(l4)
     avg5 = np.mean(l5)
+    avg6 = np.mean(l6)
 
     # ==============================================
     # 🔥 彻底解决中文/字体缺失警告（核心修复）
@@ -355,14 +356,16 @@ def show_num_ratio():
     plt.plot(l1, label=f'列表1 | 均值={avg1:.2f}', linewidth=2, marker='o', color='#1f77b4')
     plt.plot(l4, label=f'列表2 | 均值={avg4:.2f}', linewidth=2, marker='s', color='#ff7f0e')
     plt.plot(l5, label=f'列表3 | 均值={avg5:.2f}', linewidth=2, marker='^', color='#2ca02c')
-
+    plt.plot(l6, label=f'列表4 | 均值={avg6:.2f}', linewidth=2, marker='*', color='#d62728')
+    
     # 画平均值水平虚线（和曲线同色）
     plt.axhline(avg1, color='#1f77b4', linestyle='--', alpha=0.8)
     plt.axhline(avg4, color='#ff7f0e', linestyle='--', alpha=0.8)
     plt.axhline(avg5, color='#2ca02c', linestyle='--', alpha=0.8)
+    plt.axhline(avg6, color='#d62728', linestyle='--', alpha=0.8)
 
     # 图表样式
-    plt.title('三个列表数据对比（含平均值）', fontsize=14)
+    plt.title('四个列表数据对比（含平均值）', fontsize=14)
     plt.xlabel('索引/序号', fontsize=12)
     plt.ylabel('数值', fontsize=12)
     plt.legend()  # 显示图例
@@ -401,7 +404,7 @@ def main():
     """
     from get_pos import get_numimg
     print("获取预测用的图片...")
-    get_numimg(1)
+    # get_numimg(1)
 
     MODEL_PATH = "my_own_model.pth"
     IMAGE_PATH = r".\pro_img\c2.png"  # 你要识别的图片
@@ -426,7 +429,7 @@ def m1():
 
 def m2():
     """
-    用于测试训练好的模型
+    用于测试训练好的模型, 实时截图
     :return:
     """
     from get_pos import get_numimg
@@ -439,5 +442,5 @@ def m2():
 
 if __name__ == "__main__":
     # m1()
-    m2()
-    # show_num_ratio()
+    # m2()
+    show_num_ratio()

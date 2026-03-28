@@ -20,9 +20,10 @@ VALUE_ROI_HEIGHT = 37      # 高度保持（根据数字高度调整）
 # VALUE_ROI_WIDTH = 50      # 加宽：容纳两个数字+逗号（原55不够，需实测调整）
 # VALUE_ROI_HEIGHT = 15      # 高度保持（根据数字高度调整）
 
-SINGLE_NUMBER_PIXEL = 17  # 单个数字的像素值用于计算逗号分隔
+SINGLE_NUMBER_PIXEL = 17  # 单个数字的像素值用于计算逗号分隔,有待测试
 
 TEMP_X, TEMP_Y = 3464, 285  # 临时位置
+MODEL_PATH = 'my_own_model_a1.pth'  # 模型路径
 
 # =================================================================
 
@@ -33,7 +34,11 @@ OCR_CONFIG_1 = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789-'
 
 
 def clean_background_lines(roi):
-    """消除背景浅色干扰横线，只保留白色数字、负号和逗号"""
+    """
+    消除背景浅色干扰横线，只保留白色数字、负号和逗号
+    :param roi: 图片 
+    :return: 清洗后的灰度图
+    """
     gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
 
     # 1. 强力二值化：过滤浅灰背景，只保留纯白字符
@@ -58,7 +63,10 @@ def capture_screen():
 
 
 def pos_cal():
-    """模板匹配校准基准位置（可选保留，用于动态调整POS_X/POS_Y）"""
+    """
+    匹配模板并返回位置坐标
+    :return: 右上角的x, y坐标
+    """
     frame = capture_screen()
     template = cv2.imread(TEMPLATE_PATH)
     if template is None:
@@ -80,7 +88,11 @@ def pos_cal():
 
 
 def find_comma_position(clean_roi):
-    """【兜底策略】通过像素特征定位逗号位置，弥补OCR识别失败"""
+    """
+    像素特征定位逗号位置
+    :param clean_roi: 灰度图  
+    :return: 识别到的逗号位置序列
+    """
     # 逗号的像素特征：纵向窄列+中下部有连续白色像素
     roi_h, roi_w = clean_roi.shape
     comma_candidates = []
@@ -100,6 +112,7 @@ def find_comma_position(clean_roi):
         return None
 
 
+############################################
 def check_is_negative_8(clean_roi, ocr_text):
     """
     【核心优化3】单数字校验：检测是否是-8被误识别为-48/-4，通过像素特征修正
@@ -120,7 +133,6 @@ def check_is_negative_8(clean_roi, ocr_text):
             print(f"检测到误识别：{ocr_text} → 修正为-8")
             return '-8'
     return ocr_text  # 非误识别，返回原文本
-
 
 def get_two_numbers_from_single_roi():
     """识别单个ROI内用逗号分隔的两个数字"""
@@ -174,7 +186,6 @@ def get_two_numbers_from_single_roi():
         number_list.append(None)
     return number_list[0], number_list[1]
 
-
 def get_one_nnumber_from_single_roi(o_x1, o_x2):
     """识别单个ROI的单个数字"""
     # 1. 计算ROI区域（覆盖两个数字+逗号）
@@ -204,7 +215,6 @@ def get_one_nnumber_from_single_roi(o_x1, o_x2):
         print(f"无法转换为数字：{ocr_text}")
         return None
 
-
 def get_two_number_from_one():
     """识别单个ROI内用逗号分隔的两个数字"""
     # 1. 计算ROI区域（覆盖两个数字+逗号）
@@ -223,34 +233,21 @@ def get_two_number_from_one():
 
     return num1, num2
 
+############################################
+
 def get_twonumberby_torch():
-    # 1. 计算ROI区域（覆盖两个数字+逗号）
-    x1, y1 = pos_cal()
-    frame = capture_screen()
-    roi = frame[y1:y1 + VALUE_ROI_HEIGHT, x1:x1 + VALUE_ROI_WIDTH]
-
-    # 2. 预处理ROI（去干扰、强化字符）
-    clean_roi = clean_background_lines(roi)
-
-    pos_comma = find_comma_position(clean_roi)
-    arv_pos = int(sum(pos_comma) / len(pos_comma))
-    roi1 = clean_roi[:, 0:arv_pos - 5]
-    roi2 = clean_roi[:, arv_pos + 5:VALUE_ROI_WIDTH]
-
-    cv2.imwrite("temp_torch1.png", roi1)
-    cv2.imwrite("temp_torch2.png", roi2)
-
+    """
+    通过自己训练的模型识别坐标
+    :return: 识别的x, y坐标
+    """
     get_numimg(0)
     image_path = f".\\pro_img\\c1.png"
     allnums, firstnums = watch_imgnums(image_path)
-    print(f"allnums: {allnums}, firstnums: {firstnums}")
+    print(f"截取的数字个数allnums: {allnums}, firstnums: {firstnums}")
     get_numimg(firstnums)
-    res1 = get_numberbytorch(r".\pro_img\c2.png", 'my_own_model_a1.pth')
+    res1 = get_numberbytorch(r".\pro_img\c2.png", MODEL_PATH)
     get_numimg(allnums - firstnums, 1, True)
-    res2 = get_numberbytorch(r".\pro_img\c2.png", 'my_own_model_a1.pth')
-
-    # res1 = get_numberbytorch("temp_torch1.png", 'my_own_model_a1.pth')
-    # res2 = get_numberbytorch("temp_torch2.png", 'my_own_model_a1.pth')
+    res2 = get_numberbytorch(r".\pro_img\c2.png", MODEL_PATH)
 
     number_list = []
     reslist = [res1, res2]
@@ -265,8 +262,13 @@ def get_twonumberby_torch():
 
     return number_list[0], number_list[1]
 
+
+
 def get_img():
-    """ 识别两个数字 """
+    """
+    截取世界坐标位置并清洗图片
+    :return: 将图片保存到".\\debug_roi_clean.png"
+    """
     # 计算逗号的位置
     # 1. 计算ROI区域（覆盖两个数字+逗号）
     x1, y1 = pos_cal()
@@ -280,6 +282,13 @@ def get_img():
     cv2.imwrite("debug_roi_clean.png", clean_roi)  # 预处理后ROI
 
 def get_testimg(i, num, index):
+    """
+    窗口截取数字测试用函数
+    :param i: 保存图片的名称 
+    :param num: 移动到数据集下的哪个分区
+    :param index: 偏移特征
+    :return: 保存一系列图片文件
+    """
     get_img()
     c1 = c_img.crop_text_max_rect('debug_roi_clean.png', 2)
     cv2.imwrite(r".\pro_img\c1.png", c1)
@@ -305,7 +314,6 @@ def get_testimg(i, num, index):
     c3 = c_img.pad_to_square_centered(r".\pro_img\c2.png")
     cv2.imwrite(f".\\pro_img\\{i}.png", c3)
     shutil.move(f".\\pro_img\\{i}.png", f".\\my_dataset\\{num}")
-
 
 def get_numimg(digit_num, index=1, from_back=False):
     """
@@ -382,7 +390,6 @@ def get_dataset(list_imgindex, save_startindex=0):
         img_name = f"c{i}"
         save_index = get_dataset_from_clearimg(img_name, save_index)
 
-
 def ocr_clearimg(image_path):
     """
     用ocr识别单个图片
@@ -399,15 +406,15 @@ def ocr_clearimg(image_path):
 
 def classify_img(list_imgindex, class_img=''):
     """
-    根据ocr识别的图片内容分类到数据训练集
+    根据之前训练的模型识别的图片内容分类到数据训练集
     :param list_imgindex: 图片序列
-    :param class_img: 图片类别
+    :param class_img: 图片类别'', a, b, c, ...
     :return:
     """
     dst_path = r".\my_dataset"
     for i in list_imgindex:
         image_path = f".\\pro_img\\save_path\\d{i}.png"
-        ocr_text = get_numberbytorch(image_path, 'my_own_model_1.pth')
+        ocr_text = get_numberbytorch(image_path, MODEL_PATH)
         image_path_new = f".\\pro_img\\save_path\\d{class_img}{i}.png"
         shutil.move(image_path, image_path_new)
         if ocr_text == '-':
@@ -431,7 +438,8 @@ def classify_img(list_imgindex, class_img=''):
         elif ocr_text == '9':
             shutil.move(image_path_new, dst_path + r"\9")
         else:
-            print(f"识别出错：d{i}.png")
+            shutil.move(image_path_new, dst_path + r"\1")
+    
 
 # ====================== 运行测试 ======================
 if __name__ == "__main__":
@@ -457,14 +465,15 @@ if __name__ == "__main__":
     # print(allnums, firstnums)
 
     # 将main.py生成的位置图片截取为单个离散数字
-    # list_imgindex = range(1, 72 + 1)
+    # list_imgindex = range(1, 60 + 1)
     # get_dataset(list_imgindex)
 
     # ocr_text = ocr_clearimg(r"F:\XUNIJI_FILE\PythonFile\autogame\pro_img\save_path\d39.png")
     # print(ocr_text)
 
     # 分类单个离散数字图片
-    # list_imgindex = range(0, 313 + 1)
-    # classify_img(list_imgindex, 'b')
-
-    get_twonumberby_torch()
+    list_imgindex = range(0, 228 + 1)
+    classify_img(list_imgindex, 'c')
+    
+    # 获取世界坐标
+    # get_twonumberby_torch()
