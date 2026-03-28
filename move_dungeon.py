@@ -28,7 +28,7 @@ IMG_TIME = 40  # 世界坐标位置截图间隔
 IMG_IS = False
 
 TARGET1_TEMPLATE = "target1_template.png"
-TARGET1_THRESHOLD = 0.65
+TARGET1_THRESHOLD = 0.5
 TARGET2_TEMPLATE = "target2_template.png"
 TARGET3_TEMPLATE = "target3_template.png"
 
@@ -177,7 +177,7 @@ def take_image():
         imageInfo.t = time.time()
 
 
-def move_to_target(target, x_or_y='x', delta=1.0, z=False):
+def move_to_target(target, x_or_y='x', delta=1.0, z=True):
     print("开始接近目标")
     MOVE_SPEED_NEW = MOVE_SPEED * delta
     delta_new = delta
@@ -289,15 +289,54 @@ def dungeon1():
     move_once("down", 0.5)
     take_battle()
     
-    move_once("down", 1.0)
+    move_once("down", 1)
     move_to_target(r".\target_template\t11.png", 'x', 0.95)
     move_to_target(r".\target_template\t12.png", 'y', 0.84, True)
-    move_once("left", 0.5)
+    # move_once("left", 0.5)
     take_battle()
     
     move_once("right", 0.5)
     move_once("up", 2.2)
     
+    if get_single_template_center(r".\target_template\t13.png", 8.5):
+        move_to_target(r".\target_template\t13.png", 'x', 0.96)
+        move_once("up", 1.5)
+        take_battle()
+    else:
+        move_once("right", 2.2)
+        move_once("up", 1.5)
+        pass
+    
+    move_to_target(r".\target_template\t14.png", 'x', 1.02, True)
+    move_once("up", 1.5)
+    
+    
+    take_back()
+
+
+    
+def take_back():
+    
+    presskey_times("j")
+    presskey_times("w")
+    presskey_times("j")
+    time.sleep(1)
+    presskey_times("j")
+    time.sleep(3)
+    presskey_times("j")
+    presskey_times("s", 3)
+    presskey_times("j")
+    presskey_times("d", 2)
+    presskey_times("j")
+    time.sleep(1)
+    presskey_times("k", 2)
+
+    move_once("up", 0.5)
+    presskey_times("j", 2)
+    presskey_times("w", 2)
+    presskey_times("j")
+    time.sleep(4)
+
     
 def dungeon():
     """
@@ -455,9 +494,9 @@ if __name__ == "__main__":
     time.sleep(1)
     print("开始测试")
     imageInfo.t = time.time()
-    # while True:
-    print("当前时间：", time.strftime("%H:%M"))
-    dungeon1()
+    while True:
+        print("当前时间：", time.strftime("%H:%M"))
+        dungeon1()
     print("测试结束")
 
     
