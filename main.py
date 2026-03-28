@@ -316,8 +316,8 @@ def dig_mine():
             else:
                 # 归位
                 pos_x, pos_y = get_twonumberby_torch()
-                if pos_x != 12 or pos_y != 13:
-                    md(12, 13)
+                if pos_x != 9 or pos_y != 13:
+                    md(9, 13)
                             
     
     except KeyboardInterrupt:
