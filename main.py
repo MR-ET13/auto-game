@@ -12,12 +12,12 @@ from main_backup import move_dungeon as md
 # ==================== 全局配置（可根据游戏调整） ====================
 # 模板匹配相关
 BATTLE_TEMPLATE_PATH = "battle_template2.png"  # 战斗界面的模板图路径，1表示虚拟机，2表示主机
-MINE_TEMPLATE = "mine_template.png"
-MINE_THRESHOLD = 0.6
-MOVE_CONST_MAX = 500
-MOVE_CONST_MIN = 100
-MOVE_SPEED = 305
-MATCH_THRESHOLD = 0.75  # 模板匹配的置信度阈值
+MINE_TEMPLATE = "mine_template.png"  # 矿的模板路径
+MINE_THRESHOLD = 0.65  # 矿匹配阈值
+MOVE_CONST_MAX = 500  # 默认大移动幅度
+MOVE_CONST_MIN = 100  # 默认小移动幅度
+MOVE_SPEED = 315  # 移动速度
+MATCH_THRESHOLD = 0.75  # 战斗模板匹配的置信度阈值
 # 移动相关
 MOVE_LEFT_KEY = "a"  # 左移按键
 MOVE_RIGHT_KEY = "d"  # 右移按键
@@ -217,16 +217,25 @@ def main():
 
 
 def dig_mine():
+    """
+    挖矿功能
+    :return: 
+    """
     print("=" * 20)
     print("挖矿")
     print("=" * 20)
+    # 初始化参数
+    set_posx = -4
+    set_posy = 24
+    num_mine = 0
     
     try:
         while True:
             print("当前时间：", time.strftime("%H:%M"))
-            if is_in_mine():
-                play_x, play_y = find_skt_center()
+            if is_in_mine() and find_skt_center():
                 mine_x, mine_y = get_single_template_center(MINE_TEMPLATE, MINE_THRESHOLD)
+                play_x, play_y = find_skt_center()
+                
                 
                 dx = mine_x - play_x
                 move_time = dx / MOVE_SPEED
@@ -274,6 +283,8 @@ def dig_mine():
                 presskey_times("j", 2)
                 time.sleep(6)
                 
+                num_mine += 1
+                
                 move_once("down", MOVE_CONST_MIN / MOVE_SPEED)
                 # 进入战斗缓冲时间
                 time.sleep(2)
@@ -314,10 +325,12 @@ def dig_mine():
                         continue
                 
             else:
-                # 归位
+                # 归位 and 显示信息
+                print(f"已挖到{num_mine}矿")
                 pos_x, pos_y = get_twonumberby_torch()
-                if pos_x != 9 or pos_y != 13:
-                    md(9, 13)
+                if pos_x != set_posx or pos_y != set_posy:
+                    md(set_posx, set_posy)
+                
                             
     
     except KeyboardInterrupt:
@@ -325,7 +338,52 @@ def dig_mine():
     except Exception as e:
         print(f"\n❌ 脚本异常终止：{str(e)}")
                 
+def dig_mine1():
+    x, y = 2411, 772
+    target_color = (68, 83, 121)
+    set_posx, set_posy = 1, 15
+
+    num_mine = 0
+
+    while True:
+        # 带容错值（允许微小色差，适合屏幕色差场景）
+        is_match_tolerance = pyautogui.pixelMatchesColor(x, y, target_color, tolerance=10)
+        print(f"带容错的颜色匹配：{is_match_tolerance}")
+        if is_match_tolerance:
+            move_once("up", 0.5)
+            presskey_times("j")
+            time.sleep(0.5)
+            presskey_times("j")
+            time.sleep(6)
+            presskey_times("k", 5)
+            num_mine += 1
+            print(f"已挖到矿：{num_mine}")
+
+        pos_x, pos_y = get_twonumberby_torch()
+        if pos_x != set_posx or pos_y != set_posy:
+            move_once("down", 0.8)
+            md(set_posx, set_posy, 'x')
+
+
+def get_pex():
+    print("按 Ctrl+C 停止程序")
+    try:
+        while True:
+            time.sleep(1)
+            # 获取鼠标当前坐标
+            x, y = pyautogui.position()
+            # 获取当前坐标颜色
+            color = pyautogui.pixel(x, y)
+            # 清空行并打印
+            print(f"鼠标位置：({x}, {y}) | 颜色 RGB：{color}", end="\r")
+            time.sleep(0.1)
+    except KeyboardInterrupt:
+        print("\n程序已停止")
+
 
 if __name__ == "__main__":
     # main()
-    dig_mine()
+    # dig_mine()
+    # get_pex()
+    # dig_mine1()
+    get_pex()

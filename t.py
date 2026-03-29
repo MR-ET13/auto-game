@@ -1,5 +1,5 @@
 
-if (1,2):
+if 0:
     print("yes")
 else:
     print("No")

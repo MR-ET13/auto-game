@@ -116,13 +116,6 @@ def find_skt_center(threshold=SKT_MATCH):
 
     result = cv2.matchTemplate(frame_white, SKT_WHITE_MASK, cv2.TM_CCOEFF_NORMED)
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
-    # y_loc, x_loc = np.where(result >= threshold)
-    #
-    # for x, y in zip(x_loc, y_loc):
-    #     cx = x + SKT_W // 2
-    #     cy = y + SKT_H // 2
-    #     return (cx, cy)
-    # return None
     h, w = SKT_WHITE_MASK.shape[:2]
     if max_val >= threshold:
         center_x = max_loc[0] + w // 2

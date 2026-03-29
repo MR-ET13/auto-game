@@ -7,6 +7,7 @@ from winsize import set_window_size
 # from get_pos import get_two_numbers_from_single_roi
 # from get_pos import get_two_number_from_one
 from get_pos import get_twonumberby_torch
+from move_dungeon import presskey_times
 
 # ==================== 全局配置（新增/调整） ====================
 # 模板匹配相关
@@ -108,13 +109,14 @@ def move_dungeon(target_x, target_y, first='y'):
 
     while True:
         # 1. 战斗检测：遇到战斗等待结束
+        time.sleep(2)  # 战斗界面缓冲时间
         if is_in_battle():
             print("🔴 战斗中，等待结束...")
             while is_in_battle():
                 time.sleep(1)
             print("🟢 战斗结束，等待返回地图界面...")
             time.sleep(BATTLE_END_DELAY)
-            break
+            continue
 
         # 2. 获取当前坐标
         current_x, current_y = get_twonumberby_torch()
@@ -162,7 +164,7 @@ def move_dungeon(target_x, target_y, first='y'):
                         time.sleep(1)
                     print("🟢 战斗结束，等待返回地图界面...")
                     time.sleep(BATTLE_END_DELAY)
-                    break
+                    continue
             else:
                 duration = STEP_DURATION_BIG if abs(dy) > 5 else STEP_DURATION
                 move_once(move_dir, duration)
@@ -174,7 +176,7 @@ def move_dungeon(target_x, target_y, first='y'):
                         time.sleep(1)
                     print("🟢 战斗结束，等待返回地图界面...")
                     time.sleep(BATTLE_END_DELAY)
-                    break
+                    continue
 
             time.sleep(0.1)  # 移动后等待坐标更新
 
@@ -194,8 +196,10 @@ def move_dungeon(target_x, target_y, first='y'):
                 print(f"🚫 检测到阻挡！{move_dir}方向移动无效（偏移量：{total_delta:.2f}）| 连续阻挡次数：{block_retry_count}")
 
                 # 达到最大重试次数，切换绕行方向
-                if block_retry_count >= MAX_BLOCK_RETRIES:
+                if block_retry_count >= MAX_BLOCK_RETRIES:                    
                     print(f"🔀 连续{MAX_BLOCK_RETRIES}次阻挡，切换绕行方向")
+                    presskey_times("k", 5)
+                    
                     # 原方向是水平→切换垂直，原方向是垂直→切换水平
                     if move_dir in ["left", "right"]:
                         # 随机选上下
@@ -204,6 +208,15 @@ def move_dungeon(target_x, target_y, first='y'):
                         # 随机选左右
                         alt_dir = random.choice(["left", "right"])
                     move_once(alt_dir, duration=STEP_DURATION * 3)  # 绕行移动（加长时长）
+                    time.sleep(2)
+                    # 1. 战斗检测：遇到战斗等待结束
+                    if is_in_battle():
+                        print("🔴 战斗中，等待结束...")
+                        while is_in_battle():
+                            time.sleep(1)
+                        print("🟢 战斗结束，等待返回地图界面...")
+                        time.sleep(BATTLE_END_DELAY)
+                        continue
                     block_retry_count = 0  # 重置计数器
                     last_move_dir = alt_dir
             else:

@@ -6,15 +6,17 @@ import random
 # from get_pos import get_twonumberby_torch
 from get_pos import get_numimg
 from main_name import find_skt_center, get_single_template_center
+from env_var import EnvVar
 
-class ImageWrite():
+class ImageWrite:
     """ 截图信息类 """
 
     def __init__(self, t0, idx0):
         self.t = t0
         self.idx = idx0
 
-class TemplateInfo():
+class TemplateInfo:
+    """ 模板信息类(暂未启用) """
     
     def __init__(self):
         pass
@@ -25,12 +27,9 @@ BATTLE_TEMPLATE_PATH = "battle_template2.png"  # 战斗匹配模板
 MATCH_THRESHOLD = 0.75  # 战斗模板匹配阈值
 BATTLE_END_DELAY = 3.0  # 战斗结束后等待时间
 IMG_TIME = 40  # 世界坐标位置截图间隔
-IMG_IS = False
+IMG_IS = False  # 截图是否启用
 
-TARGET1_TEMPLATE = "target1_template.png"
-TARGET1_THRESHOLD = 0.5
-TARGET2_TEMPLATE = "target2_template.png"
-TARGET3_TEMPLATE = "target3_template.png"
+TARGET1_THRESHOLD = 0.5  # 目标模本匹配阈值
 
 # 移动键
 MOVE_UP_KEY = "w"
@@ -39,44 +38,8 @@ MOVE_LEFT_KEY = "a"
 MOVE_RIGHT_KEY = "d"
 
 # 生态副本移动过程
-MOVE_DEFULT_TIME = 3  # 默认移动时长
 MOVE_SPEED = 315  # 移动速度
-MOVE_1 = 370  # 移动距离（像素）
-MOVE_2 = 500
-MOVE_3 = 500
-MOVE_4 = 800
-MOVE_5 = 2000
-MOVE_6 = 917
-MOVE_7 = 1000
-MOVE_8 = 190
-MOVE_9 = 3500 # 偏大
-MOVE_10 = 160
-MOVE_11 = 800
-MOVE_12 = 1000
-MOVE_13 = 1000
-MOVE_14 = 200
-MOVE_15 = 1300
-MOVE_16 = 300
-##
-MOVE_17 = 333
-MOVE_18 = 487
-MOVE_19 = 400
-MOVE_20 = 212
-MOVE_21 = 501
-MOVE_22 = 1000
-MOVE_23 = 800
-MOVE_24 = 50
-MOVE_25 = 500
-#
-MOVE_26 = 935
-MOVE_27 = 100
-MOVE_28 = 650
-MOVE_29 = 650
-MOVE_30 = 418
-MOVE_31 = 100
-MOVE_32 = 50
-MOVE_33 = 900
-MOVE_34 = 694
+
 
 def capture_screen():
     """
@@ -87,7 +50,7 @@ def capture_screen():
     frame = np.array(screenshot)
     return cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 
-def move_once(direction, duration=MOVE_DEFULT_TIME):
+def move_once(direction, duration=3.0):
     """
     执行单次方向移动：支持自定义移动时长，适配精准微调
     :param direction: 移动方向
@@ -178,6 +141,14 @@ def take_image():
 
 
 def move_to_target(target, x_or_y='x', delta=1.0, z=True):
+    """
+    移动到目标模板x/y对齐位置
+    :param target: 模板路径 
+    :param x_or_y: 对齐方向
+    :param delta: 速度修正系数
+    :param z: 是否二次匹配(True表示可能存在遮挡，不进行二次匹配)，返回更精确的修正系数    
+    :return: 新的速度修正系数，默认为delta
+    """
     print("开始接近目标")
     MOVE_SPEED_NEW = MOVE_SPEED * delta
     delta_new = delta
@@ -229,6 +200,8 @@ def move_to_target(target, x_or_y='x', delta=1.0, z=True):
                 break
             else:
                 time.sleep(2)
+                # k键退回
+                presskey_times("k", 5)
                 dir_move = random.choice(["up", "down"])
                 move_once(dir_move, 0.2)
                 print(f"疑似遮挡，已向{dir_move}移动0.2s")
@@ -238,85 +211,114 @@ def move_to_target(target, x_or_y='x', delta=1.0, z=True):
     return delta_new
     
 def dungeon1():
+    """
+    英雄生态副本自动化移动
+    :return: 
+    """
     
-    move_once("down", 0.1)
-    move_to_target(r".\target_template\t1.png", 'y', 0.963)
-    move_once("left", 0.5)
-    take_battle()
+    print("=" * 20)
+    print("生态英雄副本")
+    print("=" * 20)
     
-    move_to_target(r".\target_template\t2.png", 'y', 0.952)
-    move_once("right", 1.5)
-    take_battle()
+    # 初始化
+    pass_num = 0
+    count_boss_max = 1000
     
-    move_once("right", 5.5)
-    take_battle()
+    while True:
+        print("当前时间：", time.strftime("%H:%M"))
+        print(f"通过副本次数{pass_num}")
     
-    move_to_target(r".\target_template\t3.png", 'x', 0.947)
-    move_once("up", 1.5)
-    take_battle()
-    
-    move_once("down", 2)
-    move_once("left", 9)
-    move_to_target(r".\target_template\t4.png", 'y', 0.984)
-    move_once("left", 5)
-    take_battle()
-    
-    move_once("left", 3.5)
-    move_once("up", 2.5)
-    take_battle()
-    
-    move_once("left", 0.8)
-    move_once("up", 4.2)
-    move_once("right", 0.8)
-    take_battle()
-    
-    move_to_target(r".\target_template\t5.png", 'x', 0.98, True)
-    move_to_target(r".\target_template\t6.png", 'y', 0.90)
-    move_once("right", 1)
-    take_battle()
-    
-    move_to_target(r".\target_template\t7.png", 'x', 1.01)
-    move_to_target(r".\target_template\t8.png", 'y', 0.99)
-    move_once("right", 2.5)
-    take_battle()
-    
-    move_once("right", 0.9)
-    move_to_target(r".\target_template\t9.png", 'y', 1.2)
-    move_once("right", 1.8)
-    take_battle()
-    
-    move_to_target(r".\target_template\t10.png", 'x', 0.94, True)
-    move_once("down", 0.5)
-    take_battle()
-    
-    move_once("down", 1)
-    move_to_target(r".\target_template\t11.png", 'x', 0.95)
-    move_to_target(r".\target_template\t12.png", 'y', 0.84, True)
-    # move_once("left", 0.5)
-    take_battle()
-    
-    move_once("right", 0.5)
-    move_once("up", 2.2)
-    
-    if get_single_template_center(r".\target_template\t13.png", 8.5):
-        move_to_target(r".\target_template\t13.png", 'x', 0.96)
+        move_once("down", 0.1)
+        move_to_target(r".\target_template\t1.png", 'y', 0.963)
+        move_once("left", 0.5)
+        take_battle()
+        
+        move_to_target(r".\target_template\t2.png", 'y', 0.952)
+        move_once("right", 1.5)
+        take_battle()
+        
+        move_once("right", 5.5)
+        take_battle()
+        
+        move_to_target(r".\target_template\t3.png", 'x', 0.947)
         move_once("up", 1.5)
         take_battle()
-    else:
-        move_once("right", 2.2)
+        
+        move_once("down", 2)
+        move_once("left", 9)
+        move_to_target(r".\target_template\t4.png", 'y', 0.984)
+        move_once("left", 5)
+        take_battle()
+        
+        move_once("left", 3.5)
+        move_once("up", 2.5)
+        take_battle()
+        
+        move_once("left", 0.8)
+        move_once("up", 4.2)
+        move_once("right", 0.8)
+        take_battle()
+        
+        move_to_target(r".\target_template\t5.png", 'x', 0.98, True)
+        move_to_target(r".\target_template\t6.png", 'y', 0.90)
+        move_once("right", 1)
+        take_battle()
+        
+        move_to_target(r".\target_template\t7.png", 'x', 1.01)
+        move_to_target(r".\target_template\t8.png", 'y', 0.99)
+        move_once("right", 2.5)
+        take_battle()
+        
+        move_once("right", 0.9)
+        move_to_target(r".\target_template\t9.png", 'y', 1.2)
+        move_once("right", 1.8)
+        take_battle()
+        
+        move_to_target(r".\target_template\t10.png", 'x', 0.94, True)
+        move_once("down", 0.5)
+        take_battle()
+        
+        move_once("down", 2)
+        move_once("right", 2)
+        move_once("down", 1.4)
+        count_boss_max -= 1
+        if count_boss_max < 0:
+
+            move_once("left", 0.5)
+            take_battle()
+            recover()  # 补血
+            count_boss_max = 3
+        
+        move_once("right", 0.5)
+        move_to_target(r".\target_template\t15.png", 'y', 0.96)
+        
+        if get_single_template_center(r".\target_template\t13.png", 1.1):
+            move_to_target(r".\target_template\t13.png", 'x', 0.96)
+            move_once("up", 1.5)
+            take_battle()
+
+            move_once("up", 1)
+            move_once("right", 1.1)
+            move_once("up", 1.5)
+            take_battle()
+			
+            move_once("down", 1)
+        else:
+            # 没有隐藏
+            move_to_target(r".\target_template\t16.png", 'x', 0.96)
+            move_once("up", 1.5)
+             
+        move_to_target(r".\target_template\t14.png", 'x', 1.02, True)
         move_once("up", 1.5)
-        pass
-    
-    move_to_target(r".\target_template\t14.png", 'x', 1.02, True)
-    move_once("up", 1.5)
-    
-    
-    take_back()
+        take_back()
 
 
     
 def take_back():
-    
+    """
+    副本主要移动结束后的重置操作 
+    :return: 
+    """
     presskey_times("j")
     presskey_times("w")
     presskey_times("j")
@@ -337,167 +339,43 @@ def take_back():
     presskey_times("j")
     time.sleep(4)
 
-    
-def dungeon():
-    """
-    生态副本移动
-    :return: 
-    """
-    
-    # # 1
-    # move_once("down", MOVE_1 / MOVE_SPEED)
-    # 
-    # move_once("left", MOVE_2 / MOVE_SPEED)
-    # take_battle()
-    # 
-    
-    # # 2
-    # move_once("down", MOVE_3 / MOVE_SPEED)
-    # 
-    # move_once("right", MOVE_4 / MOVE_SPEED)
-    # take_battle()
-    # 
-    
-    # # 3
-    # move_once("right", MOVE_5 / MOVE_SPEED)
-    # take_battle()
-    # 
-    
-    # # 4
-    # move_once("right", MOVE_6 / MOVE_SPEED)
-    # 
-    # move_once("up", MOVE_7 / MOVE_SPEED)
-    # take_battle()
-    # 
-    
-    # # 5
-    # move_once("down", MOVE_8 / MOVE_SPEED)
-    # 
-    # move_once("left", MOVE_9 / MOVE_SPEED)
-    # 
-    # move_once("up", MOVE_10 / MOVE_SPEED)
-    # 
-    # move_once("left", MOVE_11 / MOVE_SPEED)
-    # take_battle()
-    # 
-    
-    # # 6
-    # move_once("left", MOVE_12 / MOVE_SPEED)
-    # 
-    # move_once("up", MOVE_13 / MOVE_SPEED)
-    # take_battle()
-    # 
-    
-    # # 7
-    # move_once("left", MOVE_14 / MOVE_SPEED)
-    # 
-    # move_once("up", MOVE_15 / MOVE_SPEED)
-    # 
-    # move_once("right", MOVE_16 / MOVE_SPEED)
-    # take_battle()
-    # 
-    
-    # # 8
-    # # 加一个距离判断
-    # play_x, _ = find_skt_center()
-    # target_x, _ = get_single_template_center(TARGET1_TEMPLATE, TARGET1_THRESHOLD)
-    
-    # dx = target_x - play_x
-    # move_once("right", dx / MOVE_SPEED)
-    # # move_once("right", MOVE_17 / MOVE_SPEED)
-    # 
-    # move_once("up", MOVE_18 / MOVE_SPEED)
-    # 
-    # move_once("right", MOVE_19 / MOVE_SPEED)
-    # take_battle()
-    # 
-    
-    # # 9
-    # # 加一个距离判断
-    # play_x, _ = find_skt_center()
-    # target_x, _ = get_single_template_center(TARGET1_TEMPLATE, TARGET1_THRESHOLD)
-    
-    # dx = target_x - play_x
-    # move_once("left", -dx / MOVE_SPEED)
-    # # move_once("left", MOVE_20 / MOVE_SPEED)
-    
-    # move_once("down", MOVE_21 / MOVE_SPEED)
-    
-    # move_once("right", MOVE_22 / MOVE_SPEED)
-    # take_battle()
-    
-    
-    # # 10
-    # move_once("right", MOVE_23 / MOVE_SPEED)
-    
-    # move_once("up", MOVE_24 / MOVE_SPEED)
-    
-    # move_once("right", MOVE_25 / MOVE_SPEED)
-    # take_battle()
-    
-    
-    # # 11
-    # move_once("right", MOVE_26 / MOVE_SPEED)
-    
-    # move_once("down", MOVE_27 / MOVE_SPEED)
-    # take_battle()
-    
-    
-    # # 12
-    # move_once("down", MOVE_28 / MOVE_SPEED)
-    
-    # move_once("right", MOVE_29 / MOVE_SPEED)
-    
-    # move_once("down", MOVE_30 / MOVE_SPEED)
-    
-    # move_once("left", MOVE_31 / MOVE_SPEED)
-    # take_battle()
-    
-    # # 13
-    # move_once("right", MOVE_32 / MOVE_SPEED)
-    # move_once("up", MOVE_33 / MOVE_SPEED)
-    # 加一个距离判断
-    # move_to_target(TARGET2_TEMPLATE)
-    # move_once("up", 50 / MOVE_SPEED)
-    # take_battle()
-    
-    
-    # move_once("up", 552 / MOVE_SPEED)
-    # move_once("right", 600 / MOVE_SPEED)
-    
-    
-    move_to_target("target4_template.png", 'x', 0.942)  
-    # # 14
-    # move_once("right", 50 / MOVE_SPEED)
-    # presskey_times("j")
-    # presskey_times("w")
-    # presskey_times("j", 2)
-    # time.sleep(3)
-    # presskey_times("j")
-    # presskey_times("s", 3)
-    # presskey_times("j")
-    # presskey_times("d", 2)
-    # presskey_times("j")
-    # time.sleep(1)
-    # presskey_times("k", 2)
 
-    # move_once("up", 0.5)
-    # presskey_times("j", 2)
-    # presskey_times("w", 2)
-    # presskey_times("j")
-    time.sleep(4)
+def recover():
+    presskey_times("j")
+    presskey_times("s")
+    presskey_times("j")
+    time.sleep(0.5)
     
+    presskey_times("i")
+    presskey_times("j")
+    presskey_times("s")
+    presskey_times("j")  
+    presskey_times("w")
+    presskey_times("j")  # 补充数量1
+    presskey_times("s")
+    presskey_times("j", 2)  # 补充数量2
+    
+    presskey_times("k", 5)
+    time.sleep(1)
+    
+
+def test_move():
+    while True:
+        input("按键并激活游戏界面继续...")
+        evar = EnvVar("env_var.txt")
+        time.sleep(3)
+
+        if evar.get_val("select") == "move":
+            move_once(evar.get_val("direction"), evar.get_val("time"))
+        elif evar.get_val("select") == "move_by_tar":
+            move_to_target(r".\target_template" + evar.get_val("template"),
+                           evar.get_val("first_dir"), evar.get_val("delta"), False)
             
     
 if __name__ == "__main__":
-    print("请激活游戏")
-    time.sleep(1)
-    print("开始测试")
-    imageInfo.t = time.time()
-    while True:
-        print("当前时间：", time.strftime("%H:%M"))
-        dungeon1()
-    print("测试结束")
+    # recover()
+    dungeon1()
+    # test_move()
 
     
 
