@@ -48,8 +48,8 @@ def set_window_size(window_title, width, height, x=0, y=0):
 # ==================== 示例调用 ====================
 if __name__ == "__main__":
     # 主机
-    WINDOWS_ZZJB = [2380, 1400, 1376, 170]
-    WINDOWS_MLH = [1180, 1760, 130, 170]
+    WINDOWS_ZZJB = [1300, 850, 550, 100]
+    WINDOWS_MLH = [450, 900, 50, 100]
     # 虚拟机
     # WINDOWS_ZZJB = [850, 600, 500, 50]
     # WINDOWS_MLH = [300, 650, 15, 50]
