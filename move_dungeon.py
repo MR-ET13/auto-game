@@ -173,6 +173,8 @@ def move_to_target(target, x_or_y='x', delta=1.0, z=True):
                 
             else:
                 time.sleep(2)
+                # k键退回
+                presskey_times("k", 5)
                 dir_move = random.choice(["left", "right"])
                 move_once(dir_move, 0.2)
                 print(f"疑似遮挡，已向{dir_move}移动0.2s")
@@ -341,6 +343,10 @@ def take_back():
 
 
 def recover():
+    """
+	角色回复，补充数量分别为1, 2
+	:return: 
+	"""
     presskey_times("j")
     presskey_times("s")
     presskey_times("j")
@@ -360,6 +366,10 @@ def recover():
     
 
 def test_move():
+    """
+	move_once(), move_to_target()调试，通过env_var.txt设置变量
+	:return: 
+	"""
     while True:
         input("按键并激活游戏界面继续...")
         evar = EnvVar("env_var.txt")

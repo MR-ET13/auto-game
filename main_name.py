@@ -22,7 +22,7 @@ except:
 # 移动相关
 SKT_MATCH = 0.5  # skt名字匹配阈值
 MATCH_THRESHOLD = 0.75  # 战斗匹配阈值
-NAVIGATE_THRESHOLD = 0.8  #  移动目标匹配阈值
+NAVIGATE_THRESHOLD = 0.6  #  移动目标匹配阈值
 OFFSET_TOLERANCE = 50  # 移动目标像素差
 MOVE_UP_KEY = "w"
 MOVE_DOWN_KEY = "s"

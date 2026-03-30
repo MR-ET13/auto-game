@@ -243,7 +243,7 @@ def get_twonumberby_torch():
     get_numimg(0)
     image_path = f".\\pro_img\\c1.png"
     allnums, firstnums = watch_imgnums(image_path)
-    print(f"截取的数字个数allnums: {allnums}, firstnums: {firstnums}")
+    # print(f"截取的数字个数allnums: {allnums}, firstnums: {firstnums}")
     get_numimg(firstnums)
     res1 = get_numberbytorch(r".\pro_img\c2.png", MODEL_PATH)
     get_numimg(allnums - firstnums, 1, True)
@@ -324,7 +324,15 @@ def get_numimg(digit_num, index=1, from_back=False):
     """
     get_img()
     c1 = c_img.crop_text_max_rect('debug_roi_clean.png', 2)
-    cv2.imwrite(f".\\pro_img\\c{index}.png", c1)
+
+    # ✅ 关键：检查是否读取成功
+    if c1 is None:
+        print("❌ 图片读取失败！不写入，采用上一次的图像")
+    else:
+        # 读取成功才保存
+        cv2.imwrite(f".\\pro_img\\c{index}.png", c1)
+
+    # cv2.imwrite(f".\\pro_img\\c{index}.png", c1)
     if digit_num:
         c2 = c_img.crop_with_width_window(r".\pro_img\c1.png", SINGLE_NUMBER_PIXEL * digit_num,
                                           from_back, SINGLE_NUMBER_PIXEL * 0)
@@ -457,7 +465,7 @@ if __name__ == "__main__":
     #     print(f"识别失败 → 数字1：{num1}，数字2：{num2}")
 
     # get_testimg(23, '4', -2)
-    # get_numimg(0)
+    get_numimg(0)
     # save_index = get_dataset_from_clearimg(5, 2, "c4", 0)
     # print(save_index)
 
@@ -472,8 +480,8 @@ if __name__ == "__main__":
     # print(ocr_text)
 
     # 分类单个离散数字图片
-    list_imgindex = range(0, 228 + 1)
-    classify_img(list_imgindex, 'c')
+    # list_imgindex = range(0, 228 + 1)
+    # classify_img(list_imgindex, 'c')
     
     # 获取世界坐标
     # get_twonumberby_torch()

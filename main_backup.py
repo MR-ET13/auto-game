@@ -27,8 +27,8 @@ NO_BATTLE_TIMEOUT = 20.0
 MOVE_TOLERANCE = 0.5       # 坐标误差容忍度
 BLOCK_DETECTION_THRESH = 0.1  # 移动后坐标变化小于此值判定为被阻挡
 MAX_BLOCK_RETRIES = 3      # 单一方向最大阻挡重试次数
-STEP_DURATION = 0.2        # 小步移动时长
-STEP_DURATION_BIG = 1        # 大步移动时长
+STEP_DURATION = 0.1        # 小步移动时长
+STEP_DURATION_BIG = 0.5        # 大步移动时长
 # 安全配置
 pyautogui.PAUSE = 0.1
 pyautogui.FAILSAFE = True
@@ -109,7 +109,7 @@ def move_dungeon(target_x, target_y, first='y'):
 
     while True:
         # 1. 战斗检测：遇到战斗等待结束
-        time.sleep(2)  # 战斗界面缓冲时间
+        time.sleep(0.5)  # 战斗界面缓冲时间
         if is_in_battle():
             print("🔴 战斗中，等待结束...")
             while is_in_battle():
@@ -154,9 +154,9 @@ def move_dungeon(target_x, target_y, first='y'):
         if move_dir:
             print(f"📌 当前({current_x:.1f}, {current_y:.1f}) | 目标偏差 X:{dx:.1f}, Y:{dy:.1f} | 计划移动：{move_dir}")
             if move_dir in ["left", "right"]:
-                duration = STEP_DURATION_BIG if abs(dx) > 5  else STEP_DURATION
+                duration = STEP_DURATION_BIG if abs(dx) > 3  else STEP_DURATION
                 move_once(move_dir, duration)
-                time.sleep(2)
+                time.sleep(0.5)
                 # 1. 战斗检测：遇到战斗等待结束
                 if is_in_battle():
                     print("🔴 战斗中，等待结束...")
@@ -166,9 +166,9 @@ def move_dungeon(target_x, target_y, first='y'):
                     time.sleep(BATTLE_END_DELAY)
                     continue
             else:
-                duration = STEP_DURATION_BIG if abs(dy) > 5 else STEP_DURATION
+                duration = STEP_DURATION_BIG if abs(dy) > 3 else STEP_DURATION
                 move_once(move_dir, duration)
-                time.sleep(2)
+                time.sleep(0.5)
                 # 1. 战斗检测：遇到战斗等待结束
                 if is_in_battle():
                     print("🔴 战斗中，等待结束...")
@@ -198,6 +198,7 @@ def move_dungeon(target_x, target_y, first='y'):
                 # 达到最大重试次数，切换绕行方向
                 if block_retry_count >= MAX_BLOCK_RETRIES:                    
                     print(f"🔀 连续{MAX_BLOCK_RETRIES}次阻挡，切换绕行方向")
+                    # k键回退
                     presskey_times("k", 5)
                     
                     # 原方向是水平→切换垂直，原方向是垂直→切换水平
@@ -207,8 +208,8 @@ def move_dungeon(target_x, target_y, first='y'):
                     else:
                         # 随机选左右
                         alt_dir = random.choice(["left", "right"])
-                    move_once(alt_dir, duration=STEP_DURATION * 3)  # 绕行移动（加长时长）
-                    time.sleep(2)
+                    move_once(alt_dir, duration=STEP_DURATION * 2)  # 绕行移动（加长时长）
+                    time.sleep(0.5)
                     # 1. 战斗检测：遇到战斗等待结束
                     if is_in_battle():
                         print("🔴 战斗中，等待结束...")
