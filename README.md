@@ -29,11 +29,16 @@ move_dungeon()较main.py出众，通过识别单个数字的方法获取坐标
 ### ~~self_torch_self.py~~
 ~~训练识别数字的机器学习训练模型~~
 
-## doubao_torch.py
+### doubao_torch.py
 机器学习训练模型，较好效果my_own_model_a1.pth
 - 1容易被识别为5，通过计算像素总和区分
 - 6容易被识别成5，<font color="red">需要寻找区分方式</font>，“逗号”是一个方式
 - <font color="red">数字裁剪的大小有待调整</font>
 
-## dev_sys
-
+### dev_sys
+#### 需修改的地方
+- `BATTLE_TEMPLATE_PATH = "battle_template2.png"` 战斗匹配模板
+- `TEMPLATE_PATH = "number_template.png"  # 你的模板图片` “位置”定位模板图片
+- `VALUE_ROI_WIDTH = 136 \n VALUE_ROI_HEIGHT = 37` 世界坐标截图的尺寸
+- `SINGLE_NUMBER_PIXEL = 17` 单个数字的宽度
+- `TEMP_X, TEMP_Y = 3464, 285` 临时位置
