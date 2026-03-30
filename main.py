@@ -394,24 +394,24 @@ def dig_mine2():
             except TypeError:
                 continue
 
-            if get_single_template_center(".\\tan_template\\left1.png"):
+            if get_single_template_center(".\\tan_template\\left.png"):
                 try:
-                    player_x, player_y = get_single_template_center(".\\tan_template\\left1.png")
+                    player_x, player_y = get_single_template_center(".\\tan_template\\left.png")
                 except TypeError:
                     continue
-            elif get_single_template_center(".\\tan_template\\up1.png"):
+            elif get_single_template_center(".\\tan_template\\up.png"):
                 try:
-                    player_x, player_y = get_single_template_center(".\\tan_template\\up1.png")
+                    player_x, player_y = get_single_template_center(".\\tan_template\\up.png")
                 except TypeError:
                     continue
-            elif get_single_template_center(".\\tan_template\\down1.png"):
+            elif get_single_template_center(".\\tan_template\\down.png"):
                 try:
-                    player_x, player_y = get_single_template_center(".\\tan_template\\down1.png")
+                    player_x, player_y = get_single_template_center(".\\tan_template\\down.png")
                 except TypeError:
                     continue
-            elif get_single_template_center(".\\tan_template\\right1.png"):
+            elif get_single_template_center(".\\tan_template\\right.png"):
                 try:
-                    player_x, player_y = get_single_template_center(".\\tan_template\\right1.png")
+                    player_x, player_y = get_single_template_center(".\\tan_template\\right.png")
                 except TypeError:
                     continue
             else:

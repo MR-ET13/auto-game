@@ -283,24 +283,21 @@ def dungeon1():
         move_once("down", 2)
         move_once("right", 2)
         move_once("down", 1.4)
-        count_boss_max -= 1
-        if count_boss_max < 0:
 
-            move_once("left", 0.5)
-            take_battle()
-            recover()  # 补血
-            count_boss_max = 3
+        move_once("left", 0.5)
+        take_battle()
+        # recover()  # 补血
         
         move_once("right", 0.5)
         move_to_target(r".\target_template\t15.png", 'y', 0.96)
         
-        if get_single_template_center(r".\target_template\t13.png", 1.1):
+        if get_single_template_center(r".\target_template\t13.png", 0.85):
             move_to_target(r".\target_template\t13.png", 'x', 0.96)
             move_once("up", 1.5)
             take_battle()
 
             move_once("up", 1)
-            move_once("right", 1.1)
+            move_once("right", 1.5)
             move_once("up", 1.5)
             take_battle()
 			
