@@ -19,7 +19,7 @@ move_dungeon()较main.py出众，通过识别单个数字的方法获取坐标
 
 ### move_dungeon.py
 通过设定移动速度和移动距离来指定副本中的移动，目前基本调整好了速度
-- <font color="red">需要新增意外模式，进入...</font>
+- ~~<font color="red">需要新增意外模式，进入...</font>~~
 
 ### get_pos.py
 返回世界坐标，第二个数字-8会识别出错为-4，-48<br>
@@ -42,3 +42,5 @@ move_dungeon()较main.py出众，通过识别单个数字的方法获取坐标
 - `VALUE_ROI_WIDTH = 136 \n VALUE_ROI_HEIGHT = 37` 世界坐标截图的尺寸
 - `SINGLE_NUMBER_PIXEL = 17` 单个数字的宽度
 - `TEMP_X, TEMP_Y = 3464, 285` 临时位置
+- `WHITE_RATIO_MAX = 275`  识别数字1、4、5时的判别像素总和
+- <font color="red">调试`get_numimg()`函数，确定世界坐标截图没有问题</font>

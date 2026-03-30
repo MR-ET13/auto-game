@@ -201,7 +201,13 @@ def get_numimg(digit_num, index=1, from_back=False):
     """
     get_img()
     c1 = c_img.crop_text_max_rect('debug_roi_clean.png', 2)
-    cv2.imwrite(f".\\pro_img\\c{index}.png", c1)
+
+    # ✅ 关键：检查是否读取成功
+    if c1 is None:
+        print("❌ 图片读取失败！不写入，采用上一次的图像")
+    else:
+        # 读取成功才保存
+        cv2.imwrite(f".\\pro_img\\c{index}.png", c1)
     if digit_num:
         c2 = c_img.crop_with_width_window(r".\pro_img\c1.png", SINGLE_NUMBER_PIXEL * digit_num,
                                           from_back, SINGLE_NUMBER_PIXEL * 0)
@@ -220,7 +226,7 @@ def watch_imgnums(image_path):
     clean_roi = clean_background_lines(img)
     pos_comma = find_comma_position(clean_roi)
     firstnums = int(sum(pos_comma) / len(pos_comma)) // SINGLE_NUMBER_PIXEL
-    allnums = (w - int(sum(pos_comma) / len(pos_comma)))  // SINGLE_NUMBER_PIXEL + firstnums
+    allnums = (w - int(sum(pos_comma) / len(pos_comma))) // SINGLE_NUMBER_PIXEL + firstnums
     if firstnums == allnums:
         allnums += 1
     return allnums, firstnums
