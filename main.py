@@ -150,8 +150,8 @@ def main():
     print(f"超时规则：20秒未战斗 → 2s延时→D→1s→D→1s→J→1s→K")
     print(f"按键配置：左({MOVE_LEFT_KEY}) 右({MOVE_RIGHT_KEY}) | 紧急停止：鼠标移屏幕四角")
     print("=" * 60)
-    set_window_size("重装机兵:墟", WINDOWS_ZZJB[0], WINDOWS_ZZJB[1], WINDOWS_ZZJB[2], WINDOWS_ZZJB[3])  # 设置窗口为指定大小和位置
-    set_window_size("Windows PowerShell", WINDOWS_MLH[0], WINDOWS_MLH[1], WINDOWS_MLH[2], WINDOWS_MLH[3])  # 设置窗口为指定大小和位置
+    # set_window_size("重装机兵:墟", WINDOWS_ZZJB[0], WINDOWS_ZZJB[1], WINDOWS_ZZJB[2], WINDOWS_ZZJB[3])  # 设置窗口为指定大小和位置
+    # set_window_size("Windows PowerShell", WINDOWS_MLH[0], WINDOWS_MLH[1], WINDOWS_MLH[2], WINDOWS_MLH[3])  # 设置窗口为指定大小和位置
 
     time.sleep(INTERFACE_DELAY)  # 启动后等待，给你切换到游戏窗口的时间
 
@@ -325,6 +325,8 @@ def dig_mine():
                         continue
                 
             else:
+                # k键退回
+                presskey_times("k", 5)
                 # 归位 and 显示信息
                 print(f"已挖到{num_mine}矿")
                 pos_x, pos_y = get_twonumberby_torch()
@@ -339,9 +341,13 @@ def dig_mine():
         print(f"\n❌ 脚本异常终止：{str(e)}")
                 
 def dig_mine1():
-    x, y = 2411, 772
-    target_color = (68, 83, 121)
-    set_posx, set_posy = 1, 15
+    """
+    蹲矿
+    :return:
+    """
+    x, y = 2405, 815
+    target_color = (198, 101, 0)
+    set_posx, set_posy = -2, -12
 
     num_mine = 0
 
@@ -349,8 +355,8 @@ def dig_mine1():
         # 带容错值（允许微小色差，适合屏幕色差场景）
         is_match_tolerance = pyautogui.pixelMatchesColor(x, y, target_color, tolerance=10)
         print(f"带容错的颜色匹配：{is_match_tolerance}")
-        if is_match_tolerance:
-            move_once("up", 0.5)
+        if not is_match_tolerance:
+            move_once("up", 0.1)
             presskey_times("j")
             time.sleep(0.5)
             presskey_times("j")
@@ -358,14 +364,97 @@ def dig_mine1():
             presskey_times("k", 5)
             num_mine += 1
             print(f"已挖到矿：{num_mine}")
+            is_match_tolerance_ = pyautogui.pixelMatchesColor(x, y, target_color, tolerance=10)
+            if not is_match_tolerance_:
+                print("位置异常")
+                move_once("down", 0.5)
+                num_mine -= 1
+                pos_x, pos_y = get_twonumberby_torch()
+                if pos_x != set_posx or pos_y != set_posy:
+                    md(set_posx, set_posy, 'x')
 
         pos_x, pos_y = get_twonumberby_torch()
         if pos_x != set_posx or pos_y != set_posy:
-            move_once("down", 0.8)
+            move_once("down", 0.5)
             md(set_posx, set_posy, 'x')
+
+def dig_mine2():
+    set_posx, set_posy = -2, -13
+    num_mine = 0
+    print_time = time.time()
+    while True:
+        current_time = time.time()
+        if current_time - print_time > 60:
+            print(f"已挖到矿：{num_mine}")
+            print_time = time.time()
+
+        if is_in_mine():
+            try:
+                mine_x, mine_y = get_single_template_center(MINE_TEMPLATE, MINE_THRESHOLD)
+            except TypeError:
+                continue
+
+            if get_single_template_center(".\\tan_template\\left1.png"):
+                try:
+                    player_x, player_y = get_single_template_center(".\\tan_template\\left1.png")
+                except TypeError:
+                    continue
+            elif get_single_template_center(".\\tan_template\\up1.png"):
+                try:
+                    player_x, player_y = get_single_template_center(".\\tan_template\\up1.png")
+                except TypeError:
+                    continue
+            elif get_single_template_center(".\\tan_template\\down1.png"):
+                try:
+                    player_x, player_y = get_single_template_center(".\\tan_template\\down1.png")
+                except TypeError:
+                    continue
+            elif get_single_template_center(".\\tan_template\\right1.png"):
+                try:
+                    player_x, player_y = get_single_template_center(".\\tan_template\\right1.png")
+                except TypeError:
+                    continue
+            else:
+                time.sleep(0.5)
+                # k键退回
+                presskey_times("k", 5)
+                dir_move = random.choice(["left", "right"])
+                move_once(dir_move, 0.2)
+                print(f"疑似遮挡，已向{dir_move}移动0.2s")
+                continue
+
+
+            if abs(player_x - mine_x) > 100:
+                move_once("right", 2)
+                presskey_times("j")
+                time.sleep(0.5)
+                presskey_times("j")
+                time.sleep(6)
+                presskey_times("k", 5)
+                num_mine += 1
+                md(set_posx, set_posy, 'x')
+            else:
+                move_once("up", 0.8)
+                presskey_times("j")
+                time.sleep(0.5)
+                presskey_times("j")
+                time.sleep(6)
+                presskey_times("k", 5)
+                num_mine += 1
+                md(set_posx, set_posy, 'y')
+        else:
+            pos_x, pos_y = get_twonumberby_torch()
+            if pos_x != set_posx or pos_y != set_posy:
+                print("等待位置异常")
+                move_once("left", 0.3)
+                md(set_posx, set_posy, 'y')
 
 
 def get_pex():
+    """
+    获得坐标位置以及像素颜色
+    :return:
+    """
     print("按 Ctrl+C 停止程序")
     try:
         while True:
@@ -384,6 +473,6 @@ def get_pex():
 if __name__ == "__main__":
     # main()
     # dig_mine()
-    # get_pex()
     # dig_mine1()
-    get_pex()
+    # get_pex()
+    dig_mine2()
