@@ -384,7 +384,7 @@ def dig_mine2():
     print_time = time.time()
     while True:
         current_time = time.time()
-        if current_time - print_time > 20:
+        if current_time - print_time > 60:
             print(f"已挖到矿：{num_mine}")
             print_time = time.time()
 
@@ -394,24 +394,24 @@ def dig_mine2():
             except TypeError:
                 continue
 
-            if get_single_template_center(".\\tan_template\\left.png"):
+            if get_single_template_center(".\\tan_template\\left1.png"):
                 try:
-                    player_x, player_y = get_single_template_center(".\\tan_template\\left.png")
+                    player_x, player_y = get_single_template_center(".\\tan_template\\left1.png")
                 except TypeError:
                     continue
-            elif get_single_template_center(".\\tan_template\\right.png"):
+            elif get_single_template_center(".\\tan_template\\up1.png"):
                 try:
-                    player_x, player_y = get_single_template_center(".\\tan_template\\right.png")
+                    player_x, player_y = get_single_template_center(".\\tan_template\\up1.png")
                 except TypeError:
                     continue
-            elif get_single_template_center(".\\tan_template\\up.png"):
+            elif get_single_template_center(".\\tan_template\\down1.png"):
                 try:
-                    player_x, player_y = get_single_template_center(".\\tan_template\\up.png")
+                    player_x, player_y = get_single_template_center(".\\tan_template\\down1.png")
                 except TypeError:
                     continue
-            elif get_single_template_center(".\\tan_template\\down.png"):
+            elif get_single_template_center(".\\tan_template\\right1.png"):
                 try:
-                    player_x, player_y = get_single_template_center(".\\tan_template\\down.png")
+                    player_x, player_y = get_single_template_center(".\\tan_template\\right1.png")
                 except TypeError:
                     continue
             else:
@@ -424,7 +424,7 @@ def dig_mine2():
                 continue
 
 
-            if abs(player_x - mine_x) > 200:
+            if abs(player_x - mine_x) > 100:
                 move_once("right", 2)
                 presskey_times("j")
                 time.sleep(0.5)
