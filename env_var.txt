@@ -1,9 +1,9 @@
 name = env_var
-select = move_by_tar
+select = move
 
-time = 1.5
-direction = right
+time = 2
+direction = left
 
 delta = 0.96
-template = \\t16.png
+template = \\ta1.png
 first_dir = x

@@ -106,24 +106,28 @@ def find_skt_center(threshold=SKT_MATCH):
     识别白色文字 skt，返回中心坐标 (cx, cy)
     无视模板背景、无视界面背景
     """
-    if SKT_WHITE_MASK is None:
-        print("⚠️ 未加载skt模板")
-        return None
+    try:
+        if SKT_WHITE_MASK is None:
+            print("⚠️ 未加载skt模板")
+            return None
 
-    frame = capture_screen()
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    _, frame_white = cv2.threshold(gray, 220, 255, cv2.THRESH_BINARY)
+        frame = capture_screen()
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        _, frame_white = cv2.threshold(gray, 220, 255, cv2.THRESH_BINARY)
 
-    result = cv2.matchTemplate(frame_white, SKT_WHITE_MASK, cv2.TM_CCOEFF_NORMED)
-    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
-    h, w = SKT_WHITE_MASK.shape[:2]
-    if max_val >= threshold:
-        center_x = max_loc[0] + w // 2
-        center_y = max_loc[1] + h // 2
-        print(f"🎯 检测到移动对象（匹配度：{max_val:.2f}），中心坐标：({center_x}, {center_y})")
-        return (center_x, center_y)
-    else:
-        print(f"❌ 未检测到移动对象，匹配度：{max_val:.2f}（阈值：{threshold}）")
+        result = cv2.matchTemplate(frame_white, SKT_WHITE_MASK, cv2.TM_CCOEFF_NORMED)
+        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+        h, w = SKT_WHITE_MASK.shape[:2]
+        if max_val >= threshold:
+            center_x = max_loc[0] + w // 2
+            center_y = max_loc[1] + h // 2
+            print(f"🎯 检测到移动对象（匹配度：{max_val:.2f}），中心坐标：({center_x}, {center_y})")
+            return (center_x, center_y)
+        else:
+            print(f"❌ 未检测到移动对象，匹配度：{max_val:.2f}（阈值：{threshold}）")
+            return None
+    except Exception as e:
+        print(f"⚠️ 获取名称坐标出错：{e}")
         return None
 
 # ==================== 【新增：可视化验证（不影响主逻辑）】 ====================
