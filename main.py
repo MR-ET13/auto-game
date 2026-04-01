@@ -28,7 +28,7 @@ MOVE_DURATION = 1.0  # 单次移动时长（秒）
 # 延迟相关
 BATTLE_END_DELAY = 3.0  # 战斗结束后等待返回地图的时间
 INTERFACE_DELAY = 3.0  # 脚本启动后的初始等待时间
-NO_BATTLE_TIMEOUT = 20.0  # 无战斗超时阈值（秒）
+NO_BATTLE_TIMEOUT = 40.0  # 无战斗超时阈值（秒）
 IMG_TIME = 20  # 截图时间间隔
 IMG_START_IDX = 33  # 截图开始序号
 IMG_IS = False

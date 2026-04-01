@@ -42,7 +42,8 @@ MOVE_RIGHT_KEY = "d"
 # 生态副本移动过程
 MOVE_SPEED = 315  # 移动速度
 
-SAVE_DATA = True
+SAVE_DATA = False
+MOVE_BY_ABS = False
 
 def capture_screen():
     """
@@ -263,7 +264,7 @@ def dungeon1():
     # 初始化
     pass_num = 0
     last_time = time.time()
-    if not SAVE_DATA:
+    if MOVE_BY_ABS:
         df = pd.read_csv(
             "move_log.csv",
             header=None,
@@ -282,7 +283,7 @@ def dungeon1():
             last_time = time.time()
     
         move_once("down", 0.1)
-        if not SAVE_DATA:
+        if MOVE_BY_ABS:
             idx_move = 0
             move_once(row_list[idx_move][1], row_list[idx_move][2])
             idx_move += 1
@@ -291,7 +292,7 @@ def dungeon1():
         move_once("left", 0.5)
         take_battle()
 
-        if not SAVE_DATA:
+        if MOVE_BY_ABS:
             move_once(row_list[idx_move][1], row_list[idx_move][2])
             idx_move += 1
         else:
@@ -302,7 +303,7 @@ def dungeon1():
         move_once("right", 5.5)
         take_battle()
 
-        if not SAVE_DATA:
+        if MOVE_BY_ABS:
             move_once(row_list[idx_move][1], row_list[idx_move][2])
             idx_move += 1
         else:
@@ -312,7 +313,7 @@ def dungeon1():
         
         move_once("down", 2)
         move_once("left", 9)
-        if not SAVE_DATA:
+        if MOVE_BY_ABS:
             move_once(row_list[idx_move][1], row_list[idx_move][2])
             idx_move += 1
         else:
@@ -329,12 +330,12 @@ def dungeon1():
         move_once("right", 0.8)
         take_battle()
 
-        if not SAVE_DATA:
+        if MOVE_BY_ABS:
             move_once(row_list[idx_move][1], row_list[idx_move][2])
             idx_move += 1
         else:
             move_to_target(r".\target_template\t5.png", 'x', 0.98, True)
-        if not SAVE_DATA:
+        if MOVE_BY_ABS:
             move_once(row_list[idx_move][1], row_list[idx_move][2])
             idx_move += 1
         else:
@@ -342,12 +343,12 @@ def dungeon1():
         move_once("right", 1)
         take_battle()
 
-        if not SAVE_DATA:
+        if MOVE_BY_ABS:
             move_once(row_list[idx_move][1], row_list[idx_move][2])
             idx_move += 1
         else:
             move_to_target(r".\target_template\t7.png", 'x', 1.01)
-        if not SAVE_DATA:
+        if MOVE_BY_ABS:
             move_once(row_list[idx_move][1], row_list[idx_move][2])
             idx_move += 1
         else:
@@ -356,7 +357,7 @@ def dungeon1():
         take_battle()
         
         move_once("right", 0.9)
-        if not SAVE_DATA:
+        if MOVE_BY_ABS:
             move_once(row_list[idx_move][1], row_list[idx_move][2])
             idx_move += 1
         else:
@@ -364,7 +365,7 @@ def dungeon1():
         move_once("right", 1.8)
         take_battle()
 
-        if not SAVE_DATA:
+        if MOVE_BY_ABS:
             move_once(row_list[idx_move][1], row_list[idx_move][2])
             idx_move += 1
         else:
@@ -381,14 +382,14 @@ def dungeon1():
         # recover()  # 补血
         
         move_once("right", 0.5)
-        if not SAVE_DATA:
+        if MOVE_BY_ABS:
             move_once(row_list[idx_move][1], row_list[idx_move][2])
             idx_move += 1
         else:
             move_to_target(r".\target_template\t15.png", 'y', 0.96)
         
         if get_single_template_center(r".\target_template\t13.png", 0.85):
-            if not SAVE_DATA:
+            if MOVE_BY_ABS:
                 move_once(row_list[idx_move][1], row_list[idx_move][2])
                 idx_move += 1
             else:
@@ -407,7 +408,7 @@ def dungeon1():
             move_to_target(r".\target_template\t16.png", 'x', 0.96)
             move_once("up", 1.5)
 
-        if not SAVE_DATA:
+        if MOVE_BY_ABS:
             move_once(row_list[idx_move][1], row_list[idx_move][2])
             idx_move += 1
         else:
