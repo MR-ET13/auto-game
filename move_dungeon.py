@@ -3,6 +3,8 @@ import time
 import cv2
 import numpy as np
 import random
+import pandas as pd
+import os
 # from get_pos import get_twonumberby_torch
 from get_pos import get_numimg
 from main_name import find_skt_center, get_single_template_center
@@ -40,6 +42,8 @@ MOVE_RIGHT_KEY = "d"
 # 生态副本移动过程
 MOVE_SPEED = 315  # 移动速度
 
+SAVE_DATA = False
+MOVE_BY_ABS = False
 
 def capture_screen():
     """
@@ -108,13 +112,13 @@ def is_in_battle():
         return False
 
 
-def take_battle():
+def take_battle(buff_time=3):
     """
     持续战斗
     :return: 
     """
     # 进入战斗缓冲时间
-    time.sleep(3)
+    time.sleep(buff_time)
     # 1. 战斗检测：遇到战斗等待结束
     if is_in_battle():
         print("🔴 战斗中，等待结束...")
@@ -152,27 +156,42 @@ def move_to_target(target, x_or_y='x', delta=1.0, z=True):
     print("开始接近目标")
     MOVE_SPEED_NEW = MOVE_SPEED * delta
     delta_new = delta
+    sdir_move = "up"
+    sdir_time = 0.0
     if x_or_y == 'x':
         while True:
             if find_skt_center() and get_single_template_center(target, TARGET1_THRESHOLD): 
-                play_x, _ = find_skt_center()
-                target_pos, _ = get_single_template_center(target, TARGET1_THRESHOLD)
+                try:
+                    play_x, _ = find_skt_center()
+                    target_pos, _ = get_single_template_center(target, TARGET1_THRESHOLD)
+                except ValueError:
+                    print("解包失败，重试")
+                    continue
                 
                 dx = target_pos - play_x
+                sdir_time = abs(dx / MOVE_SPEED_NEW)
                 if dx > 0:                
-                    move_once("right", dx / MOVE_SPEED_NEW)            
-                else:            
+                    move_once("right", dx / MOVE_SPEED_NEW)
+                    sdir_move = "right"
+                else:
                     move_once("left", -dx / MOVE_SPEED_NEW)
+                    sdir_move = "left"
                 
                 if not z:
-                    play_x_new, _ = find_skt_center()
-                    target_pos, _ = get_single_template_center(target, TARGET1_THRESHOLD)
-                    delta_new = (abs(dx) - abs(target_pos - play_x_new)) / abs(dx)
+                    try:
+                        play_x_new, _ = find_skt_center()
+                        target_pos, _ = get_single_template_center(target, TARGET1_THRESHOLD)
+                        delta_new = (abs(dx) - abs(target_pos - play_x_new)) / abs(dx)
+                    except ValueError:
+                        print("解包失败，重试")
+                        continue
                 
                 break
                 
             else:
                 time.sleep(2)
+                # k键退回
+                presskey_times("k", 5)
                 dir_move = random.choice(["left", "right"])
                 move_once(dir_move, 0.2)
                 print(f"疑似遮挡，已向{dir_move}移动0.2s")
@@ -181,21 +200,32 @@ def move_to_target(target, x_or_y='x', delta=1.0, z=True):
     else:
         while True:
             if find_skt_center() and get_single_template_center(target, TARGET1_THRESHOLD):
-                _, play_y = find_skt_center()
-                _, target_pos = get_single_template_center(target, TARGET1_THRESHOLD)
+                try:
+                    _, play_y = find_skt_center()
+                    _, target_pos = get_single_template_center(target, TARGET1_THRESHOLD)
+                except ValueError:
+                    print("解包失败，重试")
+                    continue
                 
                 
                 dy = target_pos - play_y
+                sdir_time = abs(dy / MOVE_SPEED_NEW)
                 if dy > 0:           
                     move_once("down", dy / MOVE_SPEED_NEW)
+                    sdir_move = "down"
                     
                 else:           
                     move_once("up", -dy / MOVE_SPEED_NEW)
+                    sdir_move = "up"
                 
                 if not z:
-                    _, play_y_new = find_skt_center()
-                    _, target_pos = get_single_template_center(target, TARGET1_THRESHOLD)
-                    delta_new = (abs(dy) - abs(target_pos - play_y_new)) / abs(dy)
+                    try:
+                        _, play_y_new = find_skt_center()
+                        _, target_pos = get_single_template_center(target, TARGET1_THRESHOLD)
+                        delta_new = (abs(dy) - abs(target_pos - play_y_new)) / abs(dy)
+                    except ValueError:
+                        print("解包失败，重试")
+                        continue
                     
                 break
             else:
@@ -207,7 +237,18 @@ def move_to_target(target, x_or_y='x', delta=1.0, z=True):
                 print(f"疑似遮挡，已向{dir_move}移动0.2s")
     
     print(f"移动结束, 原速度：{MOVE_SPEED}, 新速度：{MOVE_SPEED_NEW}, 推荐修正率：{delta_new}")
-    
+
+    if SAVE_DATA:
+        new_row = pd.DataFrame([[os.path.basename(target), sdir_move, sdir_time]])
+        # 追加写入 CSV，无表头，不写索引
+        new_row.to_csv(
+            "move_log.csv",
+            mode="a",  # 追加模式
+            header=False,  # 不要表头
+            index=False,  # 不要行号
+            encoding="utf-8-sig"
+        )
+
     return delta_new
     
 def dungeon1():
@@ -222,31 +263,61 @@ def dungeon1():
     
     # 初始化
     pass_num = 0
-    count_boss_max = 1000
-    
+    last_time = time.time()
+    if MOVE_BY_ABS:
+        df = pd.read_csv(
+            "move_log.csv",
+            header=None,
+            names=["image", "direction", "time"]
+        )
+        row_list = df.values.tolist()
+
     while True:
-        print("当前时间：", time.strftime("%H:%M"))
-        print(f"通过副本次数{pass_num}")
+        
+        current_time = time.time()
+        if abs(current_time - last_time) > 60:
+            pass_num += 1
+            print("=" * 20)
+            print(f"通过副本数: {pass_num}")
+            print("=" * 20)
+            last_time = time.time()
     
         move_once("down", 0.1)
-        move_to_target(r".\target_template\t1.png", 'y', 0.963)
+        if MOVE_BY_ABS:
+            idx_move = 0
+            move_once(row_list[idx_move][1], row_list[idx_move][2])
+            idx_move += 1
+        else:
+            move_to_target(r".\target_template\t1.png", 'y', 0.963)
         move_once("left", 0.5)
         take_battle()
-        
-        move_to_target(r".\target_template\t2.png", 'y', 0.952)
+
+        if MOVE_BY_ABS:
+            move_once(row_list[idx_move][1], row_list[idx_move][2])
+            idx_move += 1
+        else:
+            move_to_target(r".\target_template\t2.png", 'y', 0.952)
         move_once("right", 1.5)
         take_battle()
         
         move_once("right", 5.5)
         take_battle()
-        
-        move_to_target(r".\target_template\t3.png", 'x', 0.947)
+
+        if MOVE_BY_ABS:
+            move_once(row_list[idx_move][1], row_list[idx_move][2])
+            idx_move += 1
+        else:
+            move_to_target(r".\target_template\t3.png", 'x', 0.947)
         move_once("up", 1.5)
         take_battle()
         
         move_once("down", 2)
         move_once("left", 9)
-        move_to_target(r".\target_template\t4.png", 'y', 0.984)
+        if MOVE_BY_ABS:
+            move_once(row_list[idx_move][1], row_list[idx_move][2])
+            idx_move += 1
+        else:
+            move_to_target(r".\target_template\t4.png", 'y', 0.984)
         move_once("left", 5)
         take_battle()
         
@@ -258,47 +329,76 @@ def dungeon1():
         move_once("up", 4.2)
         move_once("right", 0.8)
         take_battle()
-        
-        move_to_target(r".\target_template\t5.png", 'x', 0.98, True)
-        move_to_target(r".\target_template\t6.png", 'y', 0.90)
+
+        if MOVE_BY_ABS:
+            move_once(row_list[idx_move][1], row_list[idx_move][2])
+            idx_move += 1
+        else:
+            move_to_target(r".\target_template\t5.png", 'x', 0.98, True)
+        if MOVE_BY_ABS:
+            move_once(row_list[idx_move][1], row_list[idx_move][2])
+            idx_move += 1
+        else:
+            move_to_target(r".\target_template\t6.png", 'y', 0.90)
         move_once("right", 1)
         take_battle()
-        
-        move_to_target(r".\target_template\t7.png", 'x', 1.01)
-        move_to_target(r".\target_template\t8.png", 'y', 0.99)
+
+        if MOVE_BY_ABS:
+            move_once(row_list[idx_move][1], row_list[idx_move][2])
+            idx_move += 1
+        else:
+            move_to_target(r".\target_template\t7.png", 'x', 1.01)
+        if MOVE_BY_ABS:
+            move_once(row_list[idx_move][1], row_list[idx_move][2])
+            idx_move += 1
+        else:
+            move_to_target(r".\target_template\t8.png", 'y', 0.99)
         move_once("right", 2.5)
         take_battle()
         
         move_once("right", 0.9)
-        move_to_target(r".\target_template\t9.png", 'y', 1.2)
+        if MOVE_BY_ABS:
+            move_once(row_list[idx_move][1], row_list[idx_move][2])
+            idx_move += 1
+        else:
+            move_to_target(r".\target_template\t9.png", 'y', 1.2)
         move_once("right", 1.8)
         take_battle()
-        
-        move_to_target(r".\target_template\t10.png", 'x', 0.94, True)
+
+        if MOVE_BY_ABS:
+            move_once(row_list[idx_move][1], row_list[idx_move][2])
+            idx_move += 1
+        else:
+            move_to_target(r".\target_template\t10.png", 'x', 0.94, True)
         move_once("down", 0.5)
         take_battle()
         
         move_once("down", 2)
         move_once("right", 2)
         move_once("down", 1.4)
-        count_boss_max -= 1
-        if count_boss_max < 0:
 
-            move_once("left", 0.5)
-            take_battle()
-            recover()  # 补血
-            count_boss_max = 3
+        move_once("left", 0.5)
+        take_battle()
+        # recover()  # 补血
         
         move_once("right", 0.5)
-        move_to_target(r".\target_template\t15.png", 'y', 0.96)
+        if MOVE_BY_ABS:
+            move_once(row_list[idx_move][1], row_list[idx_move][2])
+            idx_move += 1
+        else:
+            move_to_target(r".\target_template\t15.png", 'y', 0.96)
         
-        if get_single_template_center(r".\target_template\t13.png", 1.1):
-            move_to_target(r".\target_template\t13.png", 'x', 0.96)
+        if get_single_template_center(r".\target_template\t13.png", 0.85):
+            if MOVE_BY_ABS:
+                move_once(row_list[idx_move][1], row_list[idx_move][2])
+                idx_move += 1
+            else:
+                move_to_target(r".\target_template\t13.png", 'x', 0.96)
             move_once("up", 1.5)
             take_battle()
 
             move_once("up", 1)
-            move_once("right", 1.1)
+            move_once("right", 1.5)
             move_once("up", 1.5)
             take_battle()
 			
@@ -307,13 +407,15 @@ def dungeon1():
             # 没有隐藏
             move_to_target(r".\target_template\t16.png", 'x', 0.96)
             move_once("up", 1.5)
-             
-        move_to_target(r".\target_template\t14.png", 'x', 1.02, True)
+
+        if MOVE_BY_ABS:
+            move_once(row_list[idx_move][1], row_list[idx_move][2])
+            idx_move += 1
+        else:
+            move_to_target(r".\target_template\t14.png", 'x', 0.96, True)
         move_once("up", 1.5)
         take_back()
 
-
-    
 def take_back():
     """
     副本主要移动结束后的重置操作 
@@ -333,14 +435,17 @@ def take_back():
     time.sleep(1)
     presskey_times("k", 2)
 
-    move_once("up", 0.5)
+    move_once("up", 1.5)
     presskey_times("j", 2)
     presskey_times("w", 2)
     presskey_times("j")
     time.sleep(4)
 
-
 def recover():
+    """
+	角色回复，补充数量分别为1, 2
+	:return: 
+	"""
     presskey_times("j")
     presskey_times("s")
     presskey_times("j")
@@ -357,9 +462,12 @@ def recover():
     
     presskey_times("k", 5)
     time.sleep(1)
-    
 
 def test_move():
+    """
+	move_once(), move_to_target()调试，通过env_var.txt设置变量
+	:return: 
+	"""
     while True:
         input("按键并激活游戏界面继续...")
         evar = EnvVar("env_var.txt")
@@ -370,12 +478,60 @@ def test_move():
         elif evar.get_val("select") == "move_by_tar":
             move_to_target(r".\target_template" + evar.get_val("template"),
                            evar.get_val("first_dir"), evar.get_val("delta"), False)
-            
-    
+
+def hospital():
+    print("等待3s开始...")
+    time.sleep(3)
+    while True:
+        take_battle(0.5)
+        if get_single_template_center(r".\target_template\ta1.png", 0.6):
+            time.sleep(1)
+            move_once("up", 0.8)
+            time.sleep(0.5)
+            presskey_times("j")
+            time.sleep(0.5)
+            presskey_times("w")
+            time.sleep(0.5)
+            presskey_times("j")
+            presskey_times("k", 5)
+            take_battle(2)
+        elif get_single_template_center(r".\target_template\ta2.png", 0.6):
+            move_once("down", 0.8)
+            time.sleep(0.5)
+            presskey_times("j")
+            time.sleep(0.5)
+            presskey_times("w")
+            time.sleep(0.5)
+            presskey_times("j")
+            presskey_times("k", 5)
+            take_battle(2)
+
+        else:
+            move_once("down", 0.8)
+            move_once("right", 9)
+            presskey_times("j")
+            time.sleep(0.5)
+            presskey_times("w")
+            time.sleep(0.5)
+            presskey_times("j")
+            presskey_times("k", 5)
+
+            take_battle(2)
+
+
+
+
+
+
+
+
+
+
 if __name__ == "__main__":
     # recover()
-    dungeon1()
+    # dungeon1()
     # test_move()
+    hospital()
 
     
 

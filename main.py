@@ -6,7 +6,7 @@ import random
 from winsize import set_window_size
 from get_pos import get_numimg, get_twonumberby_torch
 from main_name import find_skt_center, get_single_template_center
-from move_dungeon import presskey_times
+from move_dungeon import presskey_times, move_to_target
 from main_backup import move_dungeon as md
 
 # ==================== 全局配置（可根据游戏调整） ====================
@@ -28,17 +28,17 @@ MOVE_DURATION = 1.0  # 单次移动时长（秒）
 # 延迟相关
 BATTLE_END_DELAY = 3.0  # 战斗结束后等待返回地图的时间
 INTERFACE_DELAY = 3.0  # 脚本启动后的初始等待时间
-NO_BATTLE_TIMEOUT = 20.0  # 无战斗超时阈值（秒）
+NO_BATTLE_TIMEOUT = 40.0  # 无战斗超时阈值（秒）
 IMG_TIME = 20  # 截图时间间隔
 IMG_START_IDX = 33  # 截图开始序号
-IMG_IS = True
+IMG_IS = False
 # 安全配置
 pyautogui.PAUSE = 0.1  # 所有pyautogui操作的间隔
 pyautogui.FAILSAFE = True  # 鼠标移到屏幕四角触发紧急停止
 # 窗口位置大小设置 w, h, x, y
 # 主机
-WINDOWS_ZZJB = [2380, 1400, 1376, 170]
-WINDOWS_MLH = [1180, 1760, 130, 170]
+WINDOWS_ZZJB = [1300, 850, 550, 100]
+WINDOWS_MLH = [450, 900, 50, 100]
 # 虚拟机
 # WINDOWS_ZZJB = [850, 600, 500, 50]
 # WINDOWS_MLH = [300, 650, 15, 50]
@@ -162,7 +162,23 @@ def main():
 
     try:
         while True:
-            print("当前时间：", time.strftime("%H:%M"))
+
+            if find_skt_center() and get_single_template_center("mine_template.png", 0.6):
+                try:
+                    play_x, play_y = find_skt_center()
+                    mine_x, mine_y = get_single_template_center("mine_template.png", 0.6)
+                except ValueError:
+                    print("解包失败，重试")
+                    continue
+
+                if 40 < mine_y - play_y < 120:
+                    move_to_target("mine_template.png", 'x', 0.96)
+                    time.sleep(0.5)
+                    presskey_times("j")
+                    time.sleep(0.5)
+                    presskey_times("j")
+                    time.sleep(6)
+                    presskey_times("k", 5)
             # 1. 检测到战斗：重置计时，等待战斗结束
             if is_in_battle():
                 # no_battle_start_time = time.time()  # 重置无战斗计时器
@@ -207,8 +223,8 @@ def main():
                         second_dir = "up" if first_dir == "down" else "down"
 
                     # 执行：先随机方向，再切换方向
-                    move_once(first_dir)
-                    move_once(second_dir)
+                    move_once(first_dir, 1.5)
+                    move_once(second_dir, 1.5)
 
     except KeyboardInterrupt:
         print("\n🛑 脚本已手动停止（Ctrl+C）")
@@ -394,24 +410,24 @@ def dig_mine2():
             except TypeError:
                 continue
 
-            if get_single_template_center(".\\tan_template\\left1.png"):
+            if get_single_template_center(".\\tan_template\\left.png"):
                 try:
-                    player_x, player_y = get_single_template_center(".\\tan_template\\left1.png")
+                    player_x, player_y = get_single_template_center(".\\tan_template\\left.png")
                 except TypeError:
                     continue
-            elif get_single_template_center(".\\tan_template\\up1.png"):
+            elif get_single_template_center(".\\tan_template\\up.png"):
                 try:
-                    player_x, player_y = get_single_template_center(".\\tan_template\\up1.png")
+                    player_x, player_y = get_single_template_center(".\\tan_template\\up.png")
                 except TypeError:
                     continue
-            elif get_single_template_center(".\\tan_template\\down1.png"):
+            elif get_single_template_center(".\\tan_template\\down.png"):
                 try:
-                    player_x, player_y = get_single_template_center(".\\tan_template\\down1.png")
+                    player_x, player_y = get_single_template_center(".\\tan_template\\down.png")
                 except TypeError:
                     continue
-            elif get_single_template_center(".\\tan_template\\right1.png"):
+            elif get_single_template_center(".\\tan_template\\right.png"):
                 try:
-                    player_x, player_y = get_single_template_center(".\\tan_template\\right1.png")
+                    player_x, player_y = get_single_template_center(".\\tan_template\\right.png")
                 except TypeError:
                     continue
             else:
@@ -471,8 +487,8 @@ def get_pex():
 
 
 if __name__ == "__main__":
-    # main()
+    main()
     # dig_mine()
     # dig_mine1()
     # get_pex()
-    dig_mine2()
+    # dig_mine2()
