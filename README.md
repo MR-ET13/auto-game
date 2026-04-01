@@ -46,3 +46,4 @@ move_dungeon()较main.py出众，通过识别单个数字的方法获取坐标
 - <font color="red">调试`get_numimg()`函数，确定世界坐标截图没有问题</font>
 - [x] waet_template.png 名称识别模板，<font color="red">可以多增加对应场景的模板</font>
 - 医院需要新增文件夹放入对应的模板图片
+- 需要修正移动速度

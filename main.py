@@ -171,7 +171,7 @@ def main():
                     print(f"{e}\n解包失败，重试")
                     continue
 
-                if 40 < mine_y - play_y < 120:
+                if 30 < mine_y - play_y < 60:
                     move_to_target("mine_template.png", 'x', 0.96)
                     time.sleep(0.5)
                     presskey_times("j")
