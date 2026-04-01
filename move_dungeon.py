@@ -144,7 +144,7 @@ def take_image():
         imageInfo.t = time.time()
 
 
-def move_to_target(target, x_or_y='x', delta=1.0, z=True):
+def move_to_targetmove_to_target(target, x_or_y='x', delta=1.0, z=True):
     """
     移动到目标模板x/y对齐位置
     :param target: 模板路径 
@@ -164,8 +164,8 @@ def move_to_target(target, x_or_y='x', delta=1.0, z=True):
                 try:
                     play_x, _ = find_skt_center()
                     target_pos, _ = get_single_template_center(target, TARGET1_THRESHOLD)
-                except ValueError:
-                    print("解包失败，重试")
+                except Exception as e:
+                    print(f"{e}\n解包失败，重试")
                     continue
                 
                 dx = target_pos - play_x
@@ -182,8 +182,8 @@ def move_to_target(target, x_or_y='x', delta=1.0, z=True):
                         play_x_new, _ = find_skt_center()
                         target_pos, _ = get_single_template_center(target, TARGET1_THRESHOLD)
                         delta_new = (abs(dx) - abs(target_pos - play_x_new)) / abs(dx)
-                    except ValueError:
-                        print("解包失败，重试")
+                    except Exception as e:
+                        print(f"{e}\n解包失败，重试")
                         continue
                 
                 break
@@ -203,8 +203,8 @@ def move_to_target(target, x_or_y='x', delta=1.0, z=True):
                 try:
                     _, play_y = find_skt_center()
                     _, target_pos = get_single_template_center(target, TARGET1_THRESHOLD)
-                except ValueError:
-                    print("解包失败，重试")
+                except Exception as e:
+                    print(f"{e}\n解包失败，重试")
                     continue
                 
                 
@@ -223,8 +223,8 @@ def move_to_target(target, x_or_y='x', delta=1.0, z=True):
                         _, play_y_new = find_skt_center()
                         _, target_pos = get_single_template_center(target, TARGET1_THRESHOLD)
                         delta_new = (abs(dy) - abs(target_pos - play_y_new)) / abs(dy)
-                    except ValueError:
-                        print("解包失败，重试")
+                    except Exception as e:
+                        print(f"{e}\n解包失败，重试")
                         continue
                     
                 break

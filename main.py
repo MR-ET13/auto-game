@@ -167,8 +167,8 @@ def main():
                 try:
                     play_x, play_y = find_skt_center()
                     mine_x, mine_y = get_single_template_center("mine_template.png", 0.6)
-                except ValueError:
-                    print("解包失败，重试")
+                except Exception as e:
+                    print(f"{e}\n解包失败，重试")
                     continue
 
                 if 40 < mine_y - play_y < 120:

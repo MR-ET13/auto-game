@@ -12,7 +12,7 @@ import torch.nn.functional as F
 
 # ======================
 # 1. 类别定义（保持不变）
-# 新增识别1的卷积层，效果更差
+# 新增加权，增加训练集后效果变差，1
 # ======================
 CLASSES = ['-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 CLASS_TO_IDX = {c: i for i, c in enumerate(CLASSES)}
@@ -37,9 +37,6 @@ class DigitSymbolModel(nn.Module):
         self.conv3 = nn.Conv2d(64, 128, 3, 1, padding=1)
         self.bn3 = nn.BatchNorm2d(128)
 
-        # 新增识别1的卷积层
-        self.conv4 = nn.Conv2d(128, 128, 1, 1)
-
         # 池化层
         self.pool = nn.MaxPool2d(2, 2)
 
@@ -56,9 +53,6 @@ class DigitSymbolModel(nn.Module):
         x = self.pool(F.relu(self.bn1(self.conv1(x))))  # 28→14
         x = self.pool(F.relu(self.bn2(self.conv2(x))))  # 14→7
         x = self.pool(F.relu(self.bn3(self.conv3(x))))  # 7→3
-
-        # 启用识别1的卷积层
-        x = F.relu(self.conv4(x))
 
         # 展平
         x = x.flatten(1)
@@ -141,22 +135,27 @@ def train_my_model():
     val_size = len(full_dataset) - train_size
     train_dataset, val_dataset = torch.utils.data.random_split(full_dataset, [train_size, val_size])
 
-    # ✅ 正常、干净、稳定的加载器（无任何加权）
+    # 类别数量（按你真实情况）
+    class_counts = [238, 38, 137, 82, 61, 87, 34, 33, 29, 28, 43]
+    weights = torch.FloatTensor([len(full_dataset)/c for c in class_counts])
+
+    # ✅ 正常加载器（无过采样）
     train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = DigitSymbolModel().to(device)
 
-    # ✅ 普通损失函数，不加权！最稳！
-    criterion = nn.CrossEntropyLoss()
+    # ✅ 只使用损失加权
+    criterion = nn.CrossEntropyLoss(weight=weights.to(device))
 
-    optimizer = optim.AdamW(model.parameters(), lr=0.0005)
+    # ✅ 学习率变小，训练更稳定
+    optimizer = optim.AdamW(model.parameters(), lr=0.0005, weight_decay=1e-4)
     scheduler = StepLR(optimizer, step_size=5, gamma=0.5)
 
     best_val_acc = 0.0
     patience = 4
-    max_epochs = 30
+    max_epochs = 50
 
     for epoch in range(max_epochs):
         model.train()
@@ -190,18 +189,18 @@ def train_my_model():
                 val_correct += (predicted == y).sum().item()
         val_acc = val_correct / val_total
 
-        print(f"Epoch {epoch+1} | Train: {train_acc:.3f} | Val: {val_acc:.3f}")
+        print(f"Epoch {epoch+1} | TrainAcc: {train_acc:.3f} | ValAcc: {val_acc:.3f}")
 
         scheduler.step()
 
         if val_acc > best_val_acc:
             best_val_acc = val_acc
-            torch.save(model.state_dict(), "my_own_model.pth")
+            torch.save(model.state_dict(), "../my_own_model.pth")
             patience = 0
         else:
             patience += 1
             if patience >= 4:
-                print("早停 | 最佳准确率:", best_val_acc)
+                print("早停！最佳准确率：", best_val_acc)
                 break
 
     return model
@@ -284,7 +283,7 @@ def main():
     print("获取预测用的图片...")
     get_numimg(1)
 
-    MODEL_PATH = "my_own_model.pth"
+    MODEL_PATH = "../my_own_model.pth"
     IMAGE_PATH = r".\pro_img\c2.png"  # 你要识别的图片
 
     if os.path.exists(MODEL_PATH):

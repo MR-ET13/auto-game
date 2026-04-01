@@ -37,7 +37,6 @@ build/
 *.egg
 
 # 图片
-*.png
 MNIST/
 my_dataset/
 pro_img/

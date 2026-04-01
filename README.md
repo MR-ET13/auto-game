@@ -37,10 +37,12 @@ move_dungeon()较main.py出众，通过识别单个数字的方法获取坐标
 
 ### dev_sys
 #### 需修改的地方
-- `BATTLE_TEMPLATE_PATH = "battle_template2.png"` 战斗匹配模板
+- [x] `BATTLE_TEMPLATE_PATH = "battle_template2.png"` 战斗匹配模板
 - `TEMPLATE_PATH = "number_template.png"  # 你的模板图片` “位置”定位模板图片
 - `VALUE_ROI_WIDTH = 136 \n VALUE_ROI_HEIGHT = 37` 世界坐标截图的尺寸
 - `SINGLE_NUMBER_PIXEL = 17` 单个数字的宽度
 - `TEMP_X, TEMP_Y = 3464, 285` 临时位置
 - `WHITE_RATIO_MAX = 275`  识别数字1、4、5时的判别像素总和
 - <font color="red">调试`get_numimg()`函数，确定世界坐标截图没有问题</font>
+- [x] waet_template.png 名称识别模板，<font color="red">可以多增加对应场景的模板</font>
+- 医院需要新增文件夹放入对应的模板图片
