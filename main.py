@@ -122,7 +122,7 @@ def move_once(direction, duration=MOVE_DURATION):
 
 def execute_timeout_operation():
     """执行超时无战斗时的按键操作"""
-    print("\n⏰ 超过20秒未进入战斗，执行特殊操作...")
+    print(f"\n⏰ 超过{NO_BATTLE_TIMEOUT}秒未进入战斗，执行特殊操作...")
     # 延时2秒
     time.sleep(2)
     print("🔹 按下并弹起 D 键")
@@ -171,7 +171,7 @@ def main():
                     print(f"{e}\n解包失败，重试")
                     continue
 
-                if 40 < mine_y - play_y < 120:
+                if 30 < mine_y - play_y < 60:
                     move_to_target("mine_template.png", 'x', 0.96)
                     time.sleep(0.5)
                     presskey_times("j")
