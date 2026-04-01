@@ -144,7 +144,7 @@ def take_image():
         imageInfo.t = time.time()
 
 
-def move_to_targetmove_to_target(target, x_or_y='x', delta=1.0, z=True):
+def move_to_target(target, x_or_y='x', delta=1.0, z=True):
     """
     移动到目标模板x/y对齐位置
     :param target: 模板路径 
