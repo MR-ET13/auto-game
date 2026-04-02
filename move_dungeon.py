@@ -40,7 +40,7 @@ MOVE_LEFT_KEY = "a"
 MOVE_RIGHT_KEY = "d"
 
 # 生态副本移动过程
-MOVE_SPEED = 315  # 移动速度
+MOVE_SPEED = 198  # 移动速度
 
 SAVE_DATA = False
 MOVE_BY_ABS = False
@@ -477,7 +477,18 @@ def test_move():
             move_once(evar.get_val("direction"), evar.get_val("time"))
         elif evar.get_val("select") == "move_by_tar":
             move_to_target(r".\target_template" + evar.get_val("template"),
-                           evar.get_val("first_dir"), evar.get_val("delta"), False)
+                           evar.get_val("first_dir"), evar.get_val("delta"), evar.get_val("z"))
+        elif evar.get_val("select") == "name":
+            frame = capture_screen()
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            _, frame_white = cv2.threshold(gray, evar.get_val("th1"), evar.get_val("th2"), cv2.THRESH_BINARY)
+            # 自动提取白色文字，无视背景
+            _tpl = cv2.imread("waet_template.png")
+            _tpl_gray = cv2.cvtColor(_tpl, cv2.COLOR_BGR2GRAY)
+            _, SKT_WHITE_MASK = cv2.threshold(_tpl_gray, evar.get_val("th1"), evar.get_val("th2"),
+                                              cv2.THRESH_BINARY)  # 220需要和匹配函数参数一致
+            cv2.imwrite("SKT_WHITE_MASK.png", SKT_WHITE_MASK)
+            cv2.imwrite("frame_white.png", frame_white)
 
 def hospital():
     print("等待3s开始...")
@@ -518,20 +529,11 @@ def hospital():
 
             take_battle(2)
 
-
-
-
-
-
-
-
-
-
 if __name__ == "__main__":
     # recover()
     # dungeon1()
-    # test_move()
-    hospital()
+    test_move()
+    # hospital()
 
     
 

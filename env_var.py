@@ -1,13 +1,18 @@
 # 设置变量
 
 def to_value(s):
-    try:
-        return int(s)
-    except:
-        try:
-            return float(s)
-        except:
-            return s
+	try:
+		return int(s)
+	except:
+		try:
+			return float(s)
+		except:
+			if s.strip().lower() == "true":
+				return True
+			elif s.strip().lower() == "false":
+				return False
+			else:
+				return s
 
 
 class EnvVar:

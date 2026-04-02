@@ -9,11 +9,13 @@ from winsize import set_window_size
 
 # ==================== 【新增：SKT名字白色文字模板配置】 ====================
 SKT_TEMPLATE_PATH = "waet_template.png"  # 你的skt小截图
+TH1 = 190
+TH2 = 255
 try:
     # 自动提取白色文字，无视背景
     _tpl = cv2.imread(SKT_TEMPLATE_PATH)
     _tpl_gray = cv2.cvtColor(_tpl, cv2.COLOR_BGR2GRAY)
-    _, SKT_WHITE_MASK = cv2.threshold(_tpl_gray, 220, 255, cv2.THRESH_BINARY)  # 220需要和匹配函数参数一致
+    _, SKT_WHITE_MASK = cv2.threshold(_tpl_gray, TH1, TH2, cv2.THRESH_BINARY)  # 220需要和匹配函数参数一致
     SKT_H, SKT_W = SKT_WHITE_MASK.shape[:2]
 except:
     SKT_WHITE_MASK = None
@@ -47,6 +49,7 @@ OBSTACLE_DELAY = 0.5    # 绕开障碍物时的停顿时间
 NAVIGATE_MAX_STUCK = 10 # 导航整体卡住的最大重试次数（避免无限循环）
 
 TARGET_OBJ_TEMPLATE_PATH = "target_template.png"  # 目标对象模板（静止）
+
 
 # ==================== 核心功能函数 ====================
 def capture_screen():
@@ -113,11 +116,13 @@ def find_skt_center(threshold=SKT_MATCH):
 
         frame = capture_screen()
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        _, frame_white = cv2.threshold(gray, 220, 255, cv2.THRESH_BINARY)
+        _, frame_white = cv2.threshold(gray, TH1, TH2, cv2.THRESH_BINARY)
 
         result = cv2.matchTemplate(frame_white, SKT_WHITE_MASK, cv2.TM_CCOEFF_NORMED)
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
         h, w = SKT_WHITE_MASK.shape[:2]
+        # cv2.imwrite("SKT_WHITE_MASK.png", SKT_WHITE_MASK)
+        # cv2.imwrite("frame_white.png", frame_white)
         if max_val >= threshold:
             center_x = max_loc[0] + w // 2
             center_y = max_loc[1] + h // 2

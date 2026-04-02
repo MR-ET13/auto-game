@@ -1,9 +1,13 @@
 name = env_var
-select = move_by_tar
+select = name
 
 time = 1.5
 direction = right
 
-delta = 0.96
-template = \\t16.png
+delta = 0.97
+template = \\..\\test_speed_template.png
 first_dir = x
+z = True
+
+th1 = 190
+th2 = 255

@@ -159,6 +159,7 @@ def main():
     no_battle_start_time = time.time()
     img_time = time.time()
     img_index = IMG_START_IDX
+    huizhen_time = time.time()
 
     try:
         while True:
@@ -171,14 +172,19 @@ def main():
                     print(f"{e}\n解包失败，重试")
                     continue
 
-                if 30 < mine_y - play_y < 60:
-                    move_to_target("mine_template.png", 'x', 0.96)
+                if -300 < mine_y - play_y < 400:
+                    move_to_target("mine_template.png", 'x', 0.97)
+                    if mine_y - play_y > 60:
+                        move_once("down", 1.8)
+                    elif mine_y - play_y < -10:
+                        move_once("up", 1.8)
                     time.sleep(0.5)
                     presskey_times("j")
                     time.sleep(0.5)
                     presskey_times("j")
                     time.sleep(6)
                     presskey_times("k", 5)
+                    move_to_target("huizhen_template.png", 'y', 1.1)
             # 1. 检测到战斗：重置计时，等待战斗结束
             if is_in_battle():
                 # no_battle_start_time = time.time()  # 重置无战斗计时器
@@ -198,6 +204,7 @@ def main():
                 elapsed_time = current_time - no_battle_start_time
                 
                 delta_img_time = current_time - img_time
+                delta_huizhen_time = current_time - huizhen_time
 
                 # 2.1 超过20秒未战斗：执行特殊操作
                 if elapsed_time > NO_BATTLE_TIMEOUT:
@@ -210,6 +217,13 @@ def main():
                     get_numimg(0, img_index)
                     img_index += 1
                     img_time = time.time()
+
+                elif delta_huizhen_time > 300:
+                    print("定时回正")
+                    move_to_target("huizhen_template.png", 'y', 1.1)
+                    presskey_times("k", 3)
+
+                    huizhen_time = time.time()
 
                 # 2.2 未超时：执行正常移动
                 else:
