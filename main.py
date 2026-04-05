@@ -174,9 +174,9 @@ def main():
 
                 if -300 < mine_y - play_y < 400:
                     move_to_target("mine_template.png", 'x', 0.97)
-                    if mine_y - play_y > 60:
+                    if mine_y - play_y > 95:
                         move_once("down", 1.8)
-                    elif mine_y - play_y < -10:
+                    elif mine_y - play_y < 20:
                         move_once("up", 1.8)
                     time.sleep(0.5)
                     presskey_times("j")
@@ -221,6 +221,7 @@ def main():
                 elif delta_huizhen_time > 300:
                     print("定时回正")
                     move_to_target("huizhen_template.png", 'y', 1.1)
+                    move_once(random.choice(["left", "right"]), 3.5)
                     presskey_times("k", 3)
 
                     huizhen_time = time.time()

@@ -78,7 +78,7 @@ def move_once(direction, duration=3.0):
     time.sleep(0.05)
 
 
-def presskey_times(key, times=1):
+def presskey_times(key, times=1, sleep_time=0.5):
     """
     多次点击指定按键
     :param key: 按键名称
@@ -87,7 +87,7 @@ def presskey_times(key, times=1):
     """
     for _ in range(times):
         pyautogui.press(key)
-        time.sleep(0.5)
+        time.sleep(sleep_time)
 
 
 def is_in_battle():
@@ -192,7 +192,7 @@ def move_to_target(target, x_or_y='x', delta=1.0, z=True):
                 time.sleep(2)
                 # k键退回
                 presskey_times("k", 5)
-                dir_move = random.choice(["left", "right"])
+                dir_move = random.choice(["left", "right", "up", "down"])
                 move_once(dir_move, 0.2)
                 print(f"疑似遮挡，已向{dir_move}移动0.2s")
                         
@@ -232,7 +232,7 @@ def move_to_target(target, x_or_y='x', delta=1.0, z=True):
                 time.sleep(2)
                 # k键退回
                 presskey_times("k", 5)
-                dir_move = random.choice(["up", "down"])
+                dir_move = random.choice(["left", "right", "up", "down"])
                 move_once(dir_move, 0.2)
                 print(f"疑似遮挡，已向{dir_move}移动0.2s")
     
@@ -281,90 +281,98 @@ def dungeon1():
             print(f"通过副本数: {pass_num}")
             print("=" * 20)
             last_time = time.time()
-    
+        # 1
         move_once("down", 0.1)
         if MOVE_BY_ABS:
             idx_move = 0
             move_once(row_list[idx_move][1], row_list[idx_move][2])
             idx_move += 1
         else:
-            move_to_target(r".\target_template\t1.png", 'y', 0.963)
+            move_to_target(r".\target_template\t1.png", 'y', 0.94)
         move_once("left", 0.5)
         take_battle()
 
+        # 2
         if MOVE_BY_ABS:
             move_once(row_list[idx_move][1], row_list[idx_move][2])
             idx_move += 1
         else:
-            move_to_target(r".\target_template\t2.png", 'y', 0.952)
+            move_to_target(r".\target_template\t2.png", 'y', 0.94)
         move_once("right", 1.5)
         take_battle()
-        
+
+        # 3
         move_once("right", 5.5)
         take_battle()
 
+        # 4
+        move_once("right", 0.3)
         if MOVE_BY_ABS:
             move_once(row_list[idx_move][1], row_list[idx_move][2])
             idx_move += 1
         else:
-            move_to_target(r".\target_template\t3.png", 'x', 0.947)
+            move_to_target(r".\target_template\t3.png", 'x', 0.94)
         move_once("up", 1.5)
         take_battle()
-        
+
+        # 5
         move_once("down", 2)
-        move_once("left", 9)
+        move_once("left", 9.4)
         if MOVE_BY_ABS:
             move_once(row_list[idx_move][1], row_list[idx_move][2])
             idx_move += 1
         else:
-            move_to_target(r".\target_template\t4.png", 'y', 0.984)
+            move_to_target(r".\target_template\t4.png", 'y', 0.94)
         move_once("left", 5)
         take_battle()
-        
+
+        # 6
         move_once("left", 3.5)
         move_once("up", 2.5)
         take_battle()
-        
+
+        # 7
         move_once("left", 0.8)
         move_once("up", 4.2)
         move_once("right", 0.8)
         take_battle()
 
+        # 8
         if MOVE_BY_ABS:
             move_once(row_list[idx_move][1], row_list[idx_move][2])
             idx_move += 1
         else:
-            move_to_target(r".\target_template\t5.png", 'x', 0.98, True)
+            move_to_target(r".\target_template\t5.png", 'x', 0.96)
         if MOVE_BY_ABS:
             move_once(row_list[idx_move][1], row_list[idx_move][2])
             idx_move += 1
         else:
-            move_to_target(r".\target_template\t6.png", 'y', 0.90)
+            move_to_target(r".\target_template\t6.png", 'y', 0.86)
         move_once("right", 1)
         take_battle()
 
+        # 9
         if MOVE_BY_ABS:
             move_once(row_list[idx_move][1], row_list[idx_move][2])
             idx_move += 1
         else:
             move_to_target(r".\target_template\t7.png", 'x', 1.01)
-        if MOVE_BY_ABS:
-            move_once(row_list[idx_move][1], row_list[idx_move][2])
-            idx_move += 1
-        else:
-            move_to_target(r".\target_template\t8.png", 'y', 0.99)
+        move_once("down", 4)
         move_once("right", 2.5)
         take_battle()
-        
+
+        # 10
         move_once("right", 0.9)
         if MOVE_BY_ABS:
             move_once(row_list[idx_move][1], row_list[idx_move][2])
             idx_move += 1
         else:
-            move_to_target(r".\target_template\t9.png", 'y', 1.2)
+            move_to_target(r".\target_template\t9.png", 'y', 1.3)
         move_once("right", 1.8)
         take_battle()
 
+        # 11
+        move_once("right", 0.9)
         if MOVE_BY_ABS:
             move_once(row_list[idx_move][1], row_list[idx_move][2])
             idx_move += 1
@@ -372,48 +380,52 @@ def dungeon1():
             move_to_target(r".\target_template\t10.png", 'x', 0.94, True)
         move_once("down", 0.5)
         take_battle()
-        
+
+        # 12
         move_once("down", 2)
         move_once("right", 2)
         move_once("down", 1.4)
-
         move_once("left", 0.5)
         take_battle()
         # recover()  # 补血
-        
+
+        # 13
         move_once("right", 0.5)
+        move_once("up", 0.9)
         if MOVE_BY_ABS:
             move_once(row_list[idx_move][1], row_list[idx_move][2])
             idx_move += 1
         else:
-            move_to_target(r".\target_template\t15.png", 'y', 0.96)
-        
+            move_to_target(r".\target_template\t15.png", 'y', 0.93)
         if get_single_template_center(r".\target_template\t13.png", 0.85):
             if MOVE_BY_ABS:
                 move_once(row_list[idx_move][1], row_list[idx_move][2])
                 idx_move += 1
             else:
-                move_to_target(r".\target_template\t13.png", 'x', 0.96)
+                move_to_target(r".\target_template\t13.png", 'x', 0.94)
             move_once("up", 1.5)
             take_battle()
 
+            # 14
             move_once("up", 1)
-            move_once("right", 1.5)
+            move_once("right", 1.4)
             move_once("up", 1.5)
             take_battle()
 			
             move_once("down", 1)
+
         else:
             # 没有隐藏
-            move_to_target(r".\target_template\t16.png", 'x', 0.96)
+            move_to_target(r".\target_template\t16.png", 'x', 0.94)
             move_once("up", 1.5)
 
         if MOVE_BY_ABS:
             move_once(row_list[idx_move][1], row_list[idx_move][2])
             idx_move += 1
         else:
-            move_to_target(r".\target_template\t14.png", 'x', 0.96, True)
+            move_to_target(r".\target_template\t14.png", 'x', 0.94)
         move_once("up", 1.5)
+
         take_back()
 
 def take_back():
@@ -421,23 +433,32 @@ def take_back():
     副本主要移动结束后的重置操作 
     :return: 
     """
+    time.sleep(2)
     presskey_times("j")
+    time.sleep(0.5)
     presskey_times("w")
+    time.sleep(0.5)
     presskey_times("j")
     time.sleep(1)
     presskey_times("j")
     time.sleep(3)
     presskey_times("j")
+    time.sleep(0.5)
     presskey_times("s", 3)
     presskey_times("j")
+    time.sleep(0.5)
     presskey_times("d", 2)
     presskey_times("j")
     time.sleep(1)
     presskey_times("k", 2)
 
     move_once("up", 1.5)
-    presskey_times("j", 2)
-    presskey_times("w", 2)
+    presskey_times("j", 3, 0.8)
+    time.sleep(0.5)
+    presskey_times("w")
+    time.sleep(0.5)
+    presskey_times("w")
+    time.sleep(0.5)
     presskey_times("j")
     time.sleep(4)
 
@@ -525,14 +546,30 @@ def hospital():
             presskey_times("w")
             time.sleep(0.5)
             presskey_times("j")
+            time.sleep(2)
             presskey_times("k", 5)
 
             take_battle(2)
 
+            # 移动到结束
+            move_once("left", 4.5)
+            move_once("down", 4.5)
+            move_once("right", 4.5)
+            move_once("up", 2)
+            take_back()
+
+            # 移动到开始
+            move_once("left", 1.5)
+            move_once("up", 2.3)
+            move_once("left", 3.3)
+            move_once("down", 0.5)
+            time.sleep(0.5)
+
+
 if __name__ == "__main__":
     # recover()
-    # dungeon1()
-    test_move()
+    dungeon1()
+    # test_move()
     # hospital()
 
     
