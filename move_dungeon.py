@@ -426,9 +426,9 @@ def dungeon1():
             move_to_target(r".\target_template\t14.png", 'x', 0.94)
         move_once("up", 1.5)
 
-        take_back()
+        take_back("st")
 
-def take_back():
+def take_back(kind):
     """
     副本主要移动结束后的重置操作 
     :return: 
@@ -453,7 +453,17 @@ def take_back():
     presskey_times("k", 2)
 
     move_once("up", 1.5)
-    presskey_times("j", 3, 0.8)
+    if kind == "st":
+        # 生态
+        while not get_single_template_center(".\\target_template\\tb1.png", 0.85):
+            presskey_times("j")
+        while not get_single_template_center(".\\target_template\\tb2.png", 0.85):
+            presskey_times("j")
+    elif kind == "yy":
+    # 医院
+        while not get_single_template_center(".\\target_template\\tb3.png", 0.85):
+            presskey_times("j")
+
     time.sleep(0.5)
     presskey_times("w")
     time.sleep(0.5)
@@ -556,7 +566,7 @@ def hospital():
             move_once("down", 4.5)
             move_once("right", 4.5)
             move_once("up", 2)
-            take_back()
+            take_back("yy")
 
             # 移动到开始
             move_once("left", 1.5)
@@ -571,6 +581,10 @@ if __name__ == "__main__":
     dungeon1()
     # test_move()
     # hospital()
+
+
+
+
 
     
 
