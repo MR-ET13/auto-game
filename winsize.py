@@ -1,10 +1,6 @@
 import win32gui
 import win32con
-import cv2
-import numpy as np
-import pyautogui
-import time
-import random
+
 
 def set_window_size(window_title, width, height, x=0, y=0):
     """
