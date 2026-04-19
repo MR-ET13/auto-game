@@ -1,13 +1,8 @@
 name = env_var
-select = move_by_tar
+select = move_by_press
 
 time = 1.5
-direction = up
+direction = left
 
-delta = 0.94
-template = \\t14.png
-first_dir = x
-z = False
-
-th1 = 190
-th2 = 255
+key = a
+time = 1

@@ -1,8 +1,9 @@
 import cv2
 import numpy as np
-import pyautogui
+import pydirectinput
 import time
 import random
+from env_var import EnvVar
 
 # 移动相关
 MOVE_LEFT_KEY = "a"  # 左移按键
@@ -18,7 +19,7 @@ def capture_screen():
     截取全屏并转换为OpenCV的BGR格式
     :return: BGR格式
     """
-    screenshot = pyautogui.screenshot()
+    screenshot = pydirectinput.screenshot()
     frame = np.array(screenshot)
     return cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 
@@ -51,6 +52,7 @@ def is_in_battle(battle_template_path=TEM1, match_threshold=THR1):
         print(f"⚠️ 战斗检测出错：{e}")
         return False
 
+
 def move_once(direction, duration):
     """
     执行单次方向移动：支持自定义移动时长，适配精准微调
@@ -69,9 +71,9 @@ def move_once(direction, duration):
         return
     key, text, icon = key_map[direction]
     print(f"{icon} 执行{text}移动，时长 {duration} 秒")
-    pyautogui.keyDown(key)
+    pydirectinput.keyDown(key)
     time.sleep(duration)
-    pyautogui.keyUp(key)
+    pydirectinput.keyUp(key)
     time.sleep(0.05)
 
 
@@ -106,6 +108,7 @@ def get_single_template_center(template_path, threshold):
         print(f"⚠️ 获取目标坐标出错：{e}")
         return None
 
+
 def presskey_times(key, times=1, sleep_time=0.5):
     """
     多次点击指定按键
@@ -115,8 +118,9 @@ def presskey_times(key, times=1, sleep_time=0.5):
     :return:
     """
     for _ in range(times):
-        pyautogui.press(key)
-        time.sleep(sleep_time)
+        pydirectinput.press(key)
+        time.sleep(0.5)
+    time.sleep(sleep_time)
 
 def take_battle(buff_time=3):
     """
@@ -135,3 +139,31 @@ def take_battle(buff_time=3):
         time.sleep(3)
 
 
+def move_by_files(keys_files):
+    move_all = EnvVar(keys_files)
+    dict_move = move_all.config
+    for key, value in dict_move.items():
+        print(f"{key}")
+        k, t, s = value.split("-")
+        presskey_times(k, int(t), float(s))
+
+def test_move():
+    """
+	move_once(), move_to_target()调试，通过env_var.txt设置变量
+	:return:
+	"""
+    while True:
+        input("按键并激活游戏界面继续...")
+        evar = EnvVar("env_var.txt")
+        time.sleep(3)
+
+        if evar.get_val("select") == "move":
+            move_once(evar.get_val("direction"), evar.get_val("time"))
+        elif evar.get_val("select") == "move_by_press":
+            presskey_times(evar.get_val("key"), evar.get_val("time"))
+
+if __name__ == "__main__":
+    # test_move()
+    time.sleep(5)
+    print("yidong")
+    move_by_files("move_press_keys.txt")

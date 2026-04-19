@@ -1,6 +1,11 @@
 # 设置变量
 
 def to_value(s):
+	"""
+	变量转换
+	:param s: 输入字符串
+	:return: 根据字符串特征转换为对应类型
+	"""
 	try:
 		return int(s)
 	except:
@@ -31,7 +36,11 @@ class EnvVar:
 	
 
 	def get_val(self, key):
-		
+		"""
+		根据键返回值
+		:param key: 键
+		:return: 值
+		"""
 		return self.config[key]
 
 
