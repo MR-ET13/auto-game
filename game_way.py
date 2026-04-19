@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import pyautogui
 import pydirectinput
 import time
 import random
@@ -11,7 +12,7 @@ MOVE_RIGHT_KEY = "d"  # 右移按键
 MOVE_UP_KEY = "w"  # 上移按键
 MOVE_DOWN_KEY = "s"  # 下移按键
 # 模板与阈值
-TEM1 = ""
+TEM1 = ".//template_battle//first_people.png"
 THR1 = 0.8
 
 def capture_screen():
@@ -19,7 +20,7 @@ def capture_screen():
     截取全屏并转换为OpenCV的BGR格式
     :return: BGR格式
     """
-    screenshot = pydirectinput.screenshot()
+    screenshot = pyautogui.screenshot()
     frame = np.array(screenshot)
     return cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 
@@ -109,7 +110,7 @@ def get_single_template_center(template_path, threshold):
         return None
 
 
-def presskey_times(key, times=1, sleep_time=0.5):
+def presskey_times(key, times=1, sleep_time=0.5, outside=False):
     """
     多次点击指定按键
     :param key: 按键名称
@@ -119,8 +120,40 @@ def presskey_times(key, times=1, sleep_time=0.5):
     """
     for _ in range(times):
         pydirectinput.press(key)
+        if outside:
+            judgment_out(key)
         time.sleep(0.5)
     time.sleep(sleep_time)
+
+def judgment_out(key):
+    if key == "d":
+        if is_in_battle(".//template_war_vehicle//right.png"):
+            print("移动正常")
+        else:
+            print("遇到战斗")
+            take_battle(0.2)
+            pydirectinput.press("d")
+    elif key == "a":
+        if is_in_battle(".//template_war_vehicle//left.png"):
+            print("移动正常")
+        else:
+            print("遇到战斗")
+            take_battle(0.2)
+            pydirectinput.press("a")
+    elif key == "w":
+        if is_in_battle(".//template_war_vehicle//up.png"):
+            print("移动正常")
+        else:
+            print("遇到战斗")
+            take_battle(0.2)
+            pydirectinput.press("w")
+    elif key == "s":
+        if is_in_battle(".//template_war_vehicle//down.png"):
+            print("移动正常")
+        else:
+            print("遇到战斗")
+            take_battle(0.2)
+            pydirectinput.press("s")
 
 def take_battle(buff_time=3):
     """
@@ -134,18 +167,20 @@ def take_battle(buff_time=3):
     if is_in_battle():
         print("🔴 战斗中，等待结束...")
         while is_in_battle():
-            time.sleep(1)
+            pydirectinput.press("k")
+            time.sleep(0.5)
         print("🟢 战斗结束，等待返回地图界面...")
+        pydirectinput.press("k", 2)
         time.sleep(3)
 
 
-def move_by_files(keys_files):
+def move_by_files(keys_files, outside=False):
     move_all = EnvVar(keys_files)
     dict_move = move_all.config
     for key, value in dict_move.items():
         print(f"{key}")
         k, t, s = value.split("-")
-        presskey_times(k, int(t), float(s))
+        presskey_times(k, int(t), float(s), outside)
 
 def test_move():
     """
@@ -166,4 +201,5 @@ if __name__ == "__main__":
     # test_move()
     time.sleep(5)
     print("yidong")
-    move_by_files("move_press_keys.txt")
+    move_by_files("move_keys1.txt")
+    move_by_files("move_keys2.txt", True)

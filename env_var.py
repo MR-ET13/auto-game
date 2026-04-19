@@ -28,7 +28,7 @@ class EnvVar:
 		with open(config_file, "r", encoding="utf-8") as f:
 			for line in f:
 				line = line.strip()
-				if not line or "=" not in line:
+				if not line or "=" not in line or line[0] == "#":
 					continue
 				
 				key, val = line.split("=", 1)

@@ -36,7 +36,4 @@ build/
 *.egg-info/
 *.egg
 
-# 图片
-MNIST/
-my_dataset/
-pro_img/
+# 自定义
