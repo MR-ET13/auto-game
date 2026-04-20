@@ -126,6 +126,11 @@ def presskey_times(key, times=1, sleep_time=0.5, outside=False):
     time.sleep(sleep_time)
 
 def judgment_out(key):
+    """
+    判断是否正常移动
+    :param key: 移动键值
+    :return: True/False
+    """
     if key == "d":
         if is_in_battle(".//template_war_vehicle//right.png"):
             print("移动正常")
@@ -175,12 +180,35 @@ def take_battle(buff_time=3):
 
 
 def move_by_files(keys_files, outside=False):
+    """
+    通过txt文本文件移动
+    :param keys_files: 移动文件
+    :param outside: 是否在户外
+    :return: None
+    """
     move_all = EnvVar(keys_files)
     dict_move = move_all.config
     for key, value in dict_move.items():
         print(f"{key}")
         k, t, s = value.split("-")
         presskey_times(k, int(t), float(s), outside)
+
+
+def encounter_enemy():
+    while True:
+        # 随机决定本次循环的第一个移动方向
+        # first_dir = random.choice(["left", "right", "up", "down"])
+        first_dir = random.choice(["left", "right"])
+        if first_dir in ["left", "right"]:
+            second_dir = "right" if first_dir == "left" else "left"
+        else:
+            second_dir = "up" if first_dir == "down" else "down"
+
+        # 执行：先随机方向，再切换方向
+        move_once(first_dir, 0.5)
+        take_battle(0.1)
+        move_once(second_dir, 0.5)
+        take_battle(0.1)
 
 def test_move():
     """
@@ -203,3 +231,4 @@ if __name__ == "__main__":
     print("yidong")
     move_by_files("move_keys1.txt")
     move_by_files("move_keys2.txt", True)
+    encounter_enemy()
