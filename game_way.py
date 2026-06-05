@@ -115,7 +115,8 @@ def presskey_times(key, times=1, sleep_time=0.5, outside=False):
     多次点击指定按键
     :param key: 按键名称
     :param times: 按键次数
-    :param sleep_time: 按键时间间隔
+    :param sleep_time: 按键切换时间间隔
+    :param outside: 是否处于遇敌状态，默认非遇敌状态
     :return:
     """
     for _ in range(times):
@@ -173,7 +174,7 @@ def take_battle(buff_time=3):
         print("🔴 战斗中，等待结束...")
         while is_in_battle():
             pydirectinput.press("k")
-            time.sleep(0.5)
+            time.sleep(0.1)
         print("🟢 战斗结束，等待返回地图界面...")
         pydirectinput.press("k", 2)
         time.sleep(3)
@@ -195,10 +196,18 @@ def move_by_files(keys_files, outside=False):
 
 
 def encounter_enemy():
+    """
+    左右遇敌，轮域
+    :return: None
+    """
+    # 初始化无战斗计时
+    no_battle_start_time = time.time()
+
     while True:
         # 随机决定本次循环的第一个移动方向
         # first_dir = random.choice(["left", "right", "up", "down"])
-        first_dir = random.choice(["left", "right"])
+        # first_dir = random.choice(["left", "right"])
+        first_dir = "right"
         if first_dir in ["left", "right"]:
             second_dir = "right" if first_dir == "left" else "left"
         else:
@@ -206,9 +215,28 @@ def encounter_enemy():
 
         # 执行：先随机方向，再切换方向
         move_once(first_dir, 0.5)
-        take_battle(0.1)
+        if not is_in_battle():
+            current_time = time.time()
+            delta_time_no_battle = current_time - no_battle_start_time
+            if delta_time_no_battle > 20:
+                pydirectinput.press("j")
+                pydirectinput.press("k", 5)
+                no_battle_start_time = time.time()
+        else:
+            no_battle_start_time = time.time()
+        take_battle(0.8)
+
         move_once(second_dir, 0.5)
-        take_battle(0.1)
+        if not is_in_battle():
+            current_time = time.time()
+            delta_time_no_battle = current_time - no_battle_start_time
+            if delta_time_no_battle > 20:
+                pydirectinput.press("k", 4)
+                no_battle_start_time = time.time()
+        else:
+            no_battle_start_time = time.time()
+        take_battle(0.8)
+
 
 def test_move():
     """
@@ -229,6 +257,6 @@ if __name__ == "__main__":
     # test_move()
     time.sleep(5)
     print("yidong")
-    move_by_files("move_keys1.txt")
-    move_by_files("move_keys2.txt", True)
+    # move_by_files("move_keys1.txt")
+    # move_by_files("move_keys2.txt", True)
     encounter_enemy()
