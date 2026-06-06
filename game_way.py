@@ -7,10 +7,10 @@ import random
 from env_var import EnvVar
 
 # 移动相关
-MOVE_LEFT_KEY = "a"  # 左移按键
-MOVE_RIGHT_KEY = "d"  # 右移按键
-MOVE_UP_KEY = "w"  # 上移按键
-MOVE_DOWN_KEY = "s"  # 下移按键
+MOVE_LEFT_KEY = "left"  # 左移按键
+MOVE_RIGHT_KEY = "right"  # 右移按键
+MOVE_UP_KEY = "up"  # 上移按键
+MOVE_DOWN_KEY = "down"  # 下移按键
 # 模板与阈值
 TEM1 = ".//template_battle//first_people.png"
 THR1 = 0.8
@@ -46,9 +46,11 @@ def is_in_battle(battle_template_path=TEM1, match_threshold=THR1):
         max_val = cv2.minMaxLoc(result)[1]  # 只取最大匹配值
 
         if max_val >= match_threshold:
-            print(f"✅ 检测到战斗界面（匹配度：{max_val:.2f}）")
+            print(f"✅ 检测到（匹配度：{max_val:.2f}）")
             return True
-        return False
+        else:
+            print(f"❌️未检测到（匹配度：{max_val:.2f}）")
+            return False
     except Exception as e:
         print(f"⚠️ 战斗检测出错：{e}")
         return False
@@ -167,17 +169,13 @@ def take_battle(buff_time=3):
     :param buff_time: 进入战斗缓冲时间
     :return:
     """
-    # 进入战斗缓冲时间
-    time.sleep(buff_time)
-    # 1. 战斗检测：遇到战斗等待结束
-    if is_in_battle():
-        print("🔴 战斗中，等待结束...")
-        while is_in_battle():
-            pydirectinput.press("k")
-            time.sleep(0.1)
-        print("🟢 战斗结束，等待返回地图界面...")
-        pydirectinput.press("k", 2)
-        time.sleep(3)
+    print("🔴 战斗中，等待结束...")
+    # 按下z键
+    pydirectinput.keyDown("z")
+    while not is_in_battle():
+        time.sleep(0.1)
+    print("🟢 战斗结束，等待返回地图界面...")
+    pydirectinput.keyUp("z")
 
 
 def move_by_files(keys_files, outside=False):
@@ -253,10 +251,21 @@ def test_move():
         elif evar.get_val("select") == "move_by_press":
             presskey_times(evar.get_val("key"), evar.get_val("time"))
 
+def left_or_right():
+    dir = "left"
+    while True:
+        if is_in_battle():
+            move_once(dir, 0.5)
+            dir = "right" if dir == "left" else "left"
+        else:
+            take_battle()
+
+
 if __name__ == "__main__":
     # test_move()
     time.sleep(5)
     print("yidong")
     # move_by_files("move_keys1.txt")
     # move_by_files("move_keys2.txt", True)
-    encounter_enemy()
+    # encounter_enemy()
+    left_or_right()
