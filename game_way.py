@@ -251,21 +251,85 @@ def test_move():
         elif evar.get_val("select") == "move_by_press":
             presskey_times(evar.get_val("key"), evar.get_val("time"))
 
-def left_or_right():
+def left_or_right(time):
+    """
+    左右遇敌，黎明
+    :param time: 移动时间
+    :return: None
+    """
     dir = "left"
     while True:
         if is_in_battle():
-            move_once(dir, 0.5)
+            move_once(dir, time)
             dir = "right" if dir == "left" else "left"
         else:
             take_battle()
 
 
+def lure_enemy():
+    """
+    诱敌刷怪，飞狗
+    :return : None
+    """
+    MAX_LURE = 24 # 最大诱敌数
+    lure_number = 24 # 初始诱敌数
+    save_number1 = 16 # 1车的营帐数
+    save_number2 = 13 # 2车的营帐数
+    while True:
+        if not is_in_battle(): # 进入战斗
+            take_battle()
+            lure_number -= 1
+        elif lure_number > 0: # 诱敌飞狗
+            pydirectinput.press("x")
+            time.sleep(0.2)
+            pydirectinput.press('down', presses=2)
+            pydirectinput.press("z", presses=2)
+            time.sleep(0.2)
+            pydirectinput.press("z")
+            time.sleep(0.2)
+            pydirectinput.press("up")
+            pydirectinput.press("z", presses=4)
+        elif save_number1 > 0: # 单次诱敌数用尽，使用1车营帐
+            pydirectinput.press("x")
+            time.sleep(0.2)
+            pydirectinput.press("z")
+            time.sleep(0.2)
+            pydirectinput.press("right")
+            pydirectinput.press("z")
+            time.sleep(0.2)
+            pydirectinput.press("z", presses=3, interval=0.2)
+            time.sleep(0.2)
+            pydirectinput.press("up")
+            pydirectinput.press("z")
+            time.sleep(0.2)
+            save_number1 -= 1
+            lure_number = MAX_LURE
+        else: # 1车营帐用尽，使用2车营帐
+            pydirectinput.press("x")
+            time.sleep(0.2)
+            pydirectinput.press("z")
+            time.sleep(0.2)
+            pydirectinput.press("right")
+            pydirectinput.press("down")
+            pydirectinput.press("z")
+            time.sleep(0.2)
+            pydirectinput.press("z", presses=3, interval=0.2)
+            time.sleep(0.2)
+            pydirectinput.press("up")
+            pydirectinput.press("z")
+            time.sleep(0.2)
+            save_number2 -= 1
+            lure_number = MAX_LURE
+    
+    
+
+
 if __name__ == "__main__":
     # test_move()
-    time.sleep(5)
+    time.sleep(1)
     print("yidong")
     # move_by_files("move_keys1.txt")
     # move_by_files("move_keys2.txt", True)
     # encounter_enemy()
-    left_or_right()
+    # left_or_right(0.1)  #黎明-新手村左右遇敌
+    lure_enemy()
