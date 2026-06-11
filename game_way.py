@@ -274,7 +274,7 @@ def lure_enemy():
     MAX_LURE = 24 # 最大诱敌数
     lure_number = 24 # 初始诱敌数
     save_number1 = 16 # 1车的营帐数
-    save_number2 = 13 # 2车的营帐数
+    save_number2 = 15 # 2车的营帐数
     while True:
         if not is_in_battle(): # 进入战斗
             take_battle()
@@ -331,5 +331,6 @@ if __name__ == "__main__":
     # move_by_files("move_keys1.txt")
     # move_by_files("move_keys2.txt", True)
     # encounter_enemy()
-    # left_or_right(0.1)  #黎明-新手村左右遇敌
-    lure_enemy()
+    
+    left_or_right(0.1)  #黎明-新手村左右遇敌
+    # lure_enemy() # 诱敌刷
