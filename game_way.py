@@ -271,12 +271,12 @@ def lure_enemy():
     诱敌刷怪，飞狗
     :return : None
     """
-    MAX_LURE = 20 # 最大诱敌数
-    lure_number = 9 # 初始诱敌数
-    save_number1 = 16 # 1车的营帐数
+    MAX_LURE = 15 # 最大诱敌数
+    lure_number = 15 # 初始诱敌数
+    save_number1 = 20 # 1车的营帐数
     save_number2 = 15 # 2车的营帐数
-    save_number3 = 16  # 3车的营帐数
-    save_number4 = 14  # 4车的营帐数
+    save_number3 = 0  # 3车的营帐数
+    save_number4 = 0  # 4车的营帐数
     while True:
         if not is_in_battle(): # 进入战斗
             take_battle()
@@ -290,7 +290,7 @@ def lure_enemy():
             pydirectinput.press("z")
             time.sleep(0.2)
 
-            pydirectinput.press("down", 5)
+            pydirectinput.press("up", 3)
 
             pydirectinput.press("z", presses=4, interval=0.2)
         elif save_number1 > 0: # 单次诱敌数用尽，使用1车营帐
