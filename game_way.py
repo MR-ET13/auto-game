@@ -271,9 +271,9 @@ def lure_enemy():
     诱敌刷怪，飞狗
     :return : None
     """
-    MAX_LURE = 15 # 最大诱敌数
+    MAX_LURE = 24 # 最大诱敌数
     lure_number = 15 # 初始诱敌数
-    save_number1 = 20 # 1车的营帐数
+    save_number1 = 6 # 1车的营帐数
     save_number2 = 15 # 2车的营帐数
     save_number3 = 0  # 3车的营帐数
     save_number4 = 0  # 4车的营帐数
@@ -285,14 +285,18 @@ def lure_enemy():
             pydirectinput.press("x")
             time.sleep(0.2)
             pydirectinput.press('down', presses=2)
-            pydirectinput.press("z", presses=2)
-            time.sleep(0.2)
             pydirectinput.press("z")
-            time.sleep(0.2)
+            time.sleep(0.5)
+            pydirectinput.press("z")
+            time.sleep(0.5)
+            pydirectinput.press("z")
+            time.sleep(0.5)
 
-            pydirectinput.press("up", 3)
+            pydirectinput.press("up", presses=4) # 诱敌目标设置
 
             pydirectinput.press("z", presses=4, interval=0.2)
+            time.sleep(0.2)
+            
         elif save_number1 > 0: # 单次诱敌数用尽，使用1车营帐
             pydirectinput.press("c", presses=2)  # 上车***********
             pydirectinput.press("z")
