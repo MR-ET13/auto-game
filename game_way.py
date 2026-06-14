@@ -271,12 +271,12 @@ def lure_enemy():
     诱敌刷怪，飞狗
     :return : None
     """
-    MAX_LURE = 24 # 最大诱敌数
+    MAX_LURE = 20 # 最大诱敌数
     lure_number = 20 # 初始诱敌数
-    save_number1 = 5 # 1车的营帐数
-    save_number2 = 15 # 2车的营帐数
-    save_number3 = 0  # 3车的营帐数
-    save_number4 = 0  # 4车的营帐数
+    save_number1 = 20 # 1车的营帐数
+    save_number2 = 17 # 2车的营帐数
+    save_number3 = 16  # 3车的营帐数
+    save_number4 = 16  # 4车的营帐数
     while True:
         if not is_in_battle(): # 进入战斗
             take_battle()
@@ -287,7 +287,7 @@ def lure_enemy():
             pydirectinput.press('down', presses=2)
             pydirectinput.press("z", presses=3, interval=0.2)
 
-            pydirectinput.press("up", presses=4) # 诱敌目标设置
+            pydirectinput.press("down", presses=6) # 诱敌目标设置
 
             pydirectinput.press("z", presses=4, interval=0.2)
             time.sleep(0.2)
@@ -386,7 +386,22 @@ def lure_enemy():
         else:
             print("用完所有营帐")
             break
-    
+
+def clear_iteam():
+    pydirectinput.press("down", presses=7)
+    for _ in range(20):
+        pydirectinput.press("z")
+        pydirectinput.press("right")
+        pydirectinput.press("z")
+        pydirectinput.press("down")
+        pydirectinput.press("z")
+        pydirectinput.press("left")
+        pydirectinput.press("z")
+        pydirectinput.press("down")
+
+    pydirectinput.press("c")
+
+
     
 
 
@@ -400,3 +415,4 @@ if __name__ == "__main__":
     
     # left_or_right(0.1)  #黎明-新手村左右遇敌
     lure_enemy() # 诱敌刷
+    # clear_iteam()
